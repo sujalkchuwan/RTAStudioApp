@@ -7,14 +7,8 @@ import { icons } from "@/constants/icons";
 const TabIcon = ({ focused, icon, title }: any) => {
   if (focused) {
     return (
-      <ImageBackground
-        
-        className="lex flex-row w-full flex-1 min-w-[112px] min-h-16 justify-center items-center rounded-full bg-white"
-      >
-       
-        <Text className="text-red-500 text-base  text-lg font-semibold">
-          {title}
-        </Text>
+      <ImageBackground className="lex flex-row w-full flex-1 min-w-[112px] min-h-16 justify-center items-center rounded-full bg-white">
+        <Text className="text-red-500 text-lg font-semibold">{title}</Text>
       </ImageBackground>
     );
   }
@@ -38,14 +32,12 @@ const _layout = () => {
             justifyContent: "center",
             alignItems: "center",
             marginTop: 0,
-
-        
           },
           tabBarStyle: {
             backgroundColor: "#ffff",
             borderRadius: 5,
             marginHorizontal: 1,
-      
+
             height: 92,
             position: "absolute",
             overflow: "hidden",

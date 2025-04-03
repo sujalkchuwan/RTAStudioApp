@@ -47,6 +47,9 @@ export default function WelcomeScreen() {
           Sign up
         </Text>
       </TouchableOpacity>
+      <View>
+        <Link href="/(tabs)">About</Link>
+      </View>
     </ImageBackground>
   );
 }
