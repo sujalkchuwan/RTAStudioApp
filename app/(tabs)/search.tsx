@@ -1,10 +1,19 @@
-import { View, Text } from "react-native";
 import React from "react";
+import { View, Text, TextInput, FlatList } from "react-native";
+import { SvgXml } from "react-native-svg";
+import { Search } from "lucide-react-native";
+import bhutanSvg from "../(tabs)/bhutanSvg";
 
 const search = () => {
+  // const searchResults = [
+  //   { id: "1", name: "Thimphu" },
+  //   { id: "2", name: "Paro" },
+  //   { id: "3", name: "Punakha" },
+  // ];
+
   return (
-    <View>
-      <Text>search</Text>
+    <View className="flex-1 bg-white p-4">
+      hi 
     </View>
   );
 };

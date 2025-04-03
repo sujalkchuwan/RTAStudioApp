@@ -8,11 +8,11 @@ const TabIcon = ({ focused, icon, title }: any) => {
   if (focused) {
     return (
       <ImageBackground
-        source={images.highlight}
-        className="flex flex-row w-full flex-1 min-w-[112px] min-h-16 justify-center items-center rounded-full overflow-hidden"
+        
+        className="lex flex-row w-full flex-1 min-w-[112px] min-h-16 justify-center items-center rounded-full bg-white"
       >
-        <Image source={icon} tintColor="#151312" className="size-5" />
-        <Text className="text-secondary text-base font-semibold ml-2">
+       
+        <Text className="text-red-500 text-base  text-lg font-semibold">
           {title}
         </Text>
       </ImageBackground>
@@ -21,7 +21,7 @@ const TabIcon = ({ focused, icon, title }: any) => {
 
   return (
     <View className="size-full justify-center items-center rounded-full">
-      <Image source={icon} tintColor="#A8B5DB" className="size-5" />
+      <Image source={icon} tintColor="black" className="size-7" />
     </View>
   );
 };
@@ -37,17 +37,20 @@ const _layout = () => {
             height: "100%",
             justifyContent: "center",
             alignItems: "center",
+            marginTop: 0,
+
+        
           },
           tabBarStyle: {
-            backgroundColor: "#0f0D23",
-            borderRadius: 50,
-            marginHorizontal: 20,
-            marginBottom: 36,
-            height: 52,
+            backgroundColor: "#ffff",
+            borderRadius: 5,
+            marginHorizontal: 1,
+      
+            height: 92,
             position: "absolute",
             overflow: "hidden",
             borderWidth: 1,
-            borderColor: "#0f0D23",
+            borderColor: "#fff",
           },
         }}
       >
@@ -57,7 +60,7 @@ const _layout = () => {
             title: "Home",
             headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <TabIcon focused={focused} icon={icons.home} title="Home" />
+              <TabIcon focused={focused} icon={icons.home} title="Recent" />
             ),
           }}
         />
