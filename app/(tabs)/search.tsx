@@ -12,10 +12,9 @@ const search = () => {
   // ];
 
   return (
-    <View className="flex-1 bg-white p-4">
-      hi 
+    <View className="flex-1 bg-gray-100 px-4 pt-6 gap-4">
+     
+     hi
     </View>
   );
-};
-
-export default search;
+}

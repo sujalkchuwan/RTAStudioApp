@@ -47,6 +47,11 @@ export default function WelcomeScreen() {
           Sign up
         </Text>
       </TouchableOpacity>
+      <View className="mt-10 left-0 right-0 flex-row justify-center">
+        <Link href="/(tabs)" className="text-white">
+          Go to Tabs?
+        </Link>
+      </View>
     </ImageBackground>
   );
 }
