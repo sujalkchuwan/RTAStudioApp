@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TextInput, FlatList } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { Search } from "lucide-react-native";
-import bhutanSvg from "../(tabs)/bhutanSvg";
+
 
 const search = () => {
   // const searchResults = [
