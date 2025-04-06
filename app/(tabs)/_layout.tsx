@@ -67,12 +67,12 @@ const _layout = () => {
           }}
         />
         <Tabs.Screen
-          name="saved"
+          name="explore"
           options={{
-            title: "Saved",
+            title: "explore",
             headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <TabIcon focused={focused} icon={icons.save} title="Saved" />
+              <TabIcon focused={focused} icon={icons.save} title="Explore" />
             ),
           }}
         />
