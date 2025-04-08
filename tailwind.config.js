@@ -10,6 +10,7 @@ module.exports = {
         blackoutlines: "#939393",
         blue: "6998FF",
         light: "#F2F2F7",
+        borderseparators: "#F4A9AA",
       },
     },
   },

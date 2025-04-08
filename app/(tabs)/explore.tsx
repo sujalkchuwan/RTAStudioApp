@@ -59,8 +59,7 @@ export default function ExploreScreen() {
             <View
               style={{
                 width: screenWidth - 32, // Full screen width minus padding
-                height: 250, // Increase height for better visibility
-                borderRadius: 12,
+                height: 315, // Increase height for better visibility
                 overflow: "hidden",
                 marginBottom: 16,
                 alignSelf: "center", // Center the item

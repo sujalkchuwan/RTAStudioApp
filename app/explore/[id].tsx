@@ -1,6 +1,7 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useState } from "react";
+import { FontAwesome } from "@expo/vector-icons";
 
 const textileData: Record<
   string,
@@ -63,14 +64,32 @@ export default function TextileDetailScreen() {
   if (!textile) return <Text>Textile not found</Text>;
 
   return (
-    <ScrollView style={{ padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>{textile.name}</Text>
+    <ScrollView className="p-[26px]">
+      <View className="border-b border-borderseparators h-12 flex-row items-center">
+        <TouchableOpacity onPress={() => router.back()}>
+          <FontAwesome
+            name="angle-left"
+            size={24}
+            color="black"
+            style={{ marginRight: 12 }}
+          />
+        </TouchableOpacity>
+        <Text className="font-bold text-2xl">{textile.name}</Text>
+      </View>
 
       {/* Description Section */}
-      <TouchableOpacity onPress={() => toggleSection("description")}>
-        <Text style={{ fontWeight: "bold", marginVertical: 5 }}>
-          Description ▼
-        </Text>
+      <TouchableOpacity
+        onPress={() => toggleSection("description")}
+        className={`h-11 justify-center flex-row items-center ${
+          expandedSections.description ? "" : "border-b border-borderseparators"
+        }`}
+      >
+        <Text className="font-bold text-base flex-1">Description</Text>
+        <FontAwesome
+          name={expandedSections.description ? "angle-up" : "angle-down"}
+          size={20}
+          color="black"
+        />
       </TouchableOpacity>
       {expandedSections.description && (
         <View>
@@ -84,8 +103,18 @@ export default function TextileDetailScreen() {
       )}
 
       {/* Textile Section */}
-      <TouchableOpacity onPress={() => toggleSection("textile")}>
-        <Text style={{ fontWeight: "bold", marginVertical: 5 }}>Textile ▼</Text>
+      <TouchableOpacity
+        onPress={() => toggleSection("textile")}
+        className={`h-11 justify-center flex-row items-center ${
+          expandedSections.textile ? "" : "border-b border-borderseparators"
+        }`}
+      >
+        <Text className="font-bold text-base flex-1">Textile</Text>
+        <FontAwesome
+          name={expandedSections.textile ? "angle-up" : "angle-down"}
+          size={20}
+          color="black"
+        />
       </TouchableOpacity>
       {expandedSections.textile && (
         <Image
@@ -96,8 +125,18 @@ export default function TextileDetailScreen() {
       )}
 
       {/* Motifs Section */}
-      <TouchableOpacity onPress={() => toggleSection("motifs")}>
-        <Text style={{ fontWeight: "bold", marginVertical: 5 }}>Motifs ▼</Text>
+      <TouchableOpacity
+        onPress={() => toggleSection("motifs")}
+        className={`h-11 justify-center flex-row items-center ${
+          expandedSections.motifs ? "" : "border-b border-borderseparators"
+        }`}
+      >
+        <Text className="font-bold text-base flex-1">Motifs</Text>
+        <FontAwesome
+          name={expandedSections.motifs ? "angle-up" : "angle-down"}
+          size={20}
+          color="black"
+        />
       </TouchableOpacity>
       {expandedSections.motifs && (
         <View
@@ -120,10 +159,18 @@ export default function TextileDetailScreen() {
       )}
 
       {/* Weaving Techniques Section */}
-      <TouchableOpacity onPress={() => toggleSection("weavingTechniques")}>
-        <Text style={{ fontWeight: "bold", marginVertical: 5 }}>
-          Weaving Techniques and Processes ▼
+      <TouchableOpacity
+        onPress={() => toggleSection("weavingTechniques")}
+        className={`h-11 justify-center flex-row items-center`}
+      >
+        <Text className="font-bold text-base flex-1">
+          Weaving Techniques and Processes
         </Text>
+        <FontAwesome
+          name={expandedSections.weavingTechniques ? "angle-up" : "angle-down"}
+          size={20}
+          color="black"
+        />
       </TouchableOpacity>
       {expandedSections.weavingTechniques && (
         <View>
