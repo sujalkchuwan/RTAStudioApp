@@ -82,13 +82,14 @@ export default function search() {
   ];
 
   return (
-    <View className="flex-1 bg-gray-100 px-4 pt-6 gap-4">
+    <View className="flex-1 bg-gray-100 px-4 pt-6 gap-4 mt-10">
       {/* Search Bar */}
-      <Text className="text-2xl font-bold mb-4">Search</Text>
+      <Text className="text-4xl font-semibold text-black">Search</Text>
       <TextInput
-        placeholder="Find files"
-        className="bg-white p-3 rounded-lg shadow mb-6"
-      />
+  placeholder="Find files"
+  placeholderTextColor="#9ca3af" // Optional: Tailwind's gray-400
+  className="bg-white px-4 py-3 rounded-xl  text-base text-gray-800 mb-6 border border-gray-200"
+/>
 
       {/* Shared Files Section */}
       <Text className="text-lg font-semibold mb-2">Shared with You</Text>

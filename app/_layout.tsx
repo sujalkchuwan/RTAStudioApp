@@ -1,6 +1,7 @@
 import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
 import * as Linking from "expo-linking";
+import { StatusBar } from "react-native";
 import "./globals.css";
 
 export default function RootLayout() {
@@ -14,16 +15,12 @@ export default function RootLayout() {
 
       const token = queryParams?.token;
       if (token) {
-        // You can store the token in async storage here if needed
-        // AsyncStorage.setItem('authToken', token);
-        // Then navigate to authenticated page
         router.replace("/(tabs)");
       }
     };
 
     const subscription = Linking.addEventListener("url", handleDeepLink);
 
-    // Also handle the case where the app is launched from a deep link
     Linking.getInitialURL().then((url) => {
       if (url) {
         handleDeepLink({ url } as Linking.EventType & { url: string });
@@ -34,10 +31,15 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="explore/[id]" options={{ headerShown: false }} />
-    </Stack>
+    <>
+      {/* ✅ Black background with white icons/text */}
+      <StatusBar barStyle="light-content" backgroundColor="black" />
+      
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="explore/[id]" options={{ headerShown: false }} />
+      </Stack>
+    </>
   );
 }

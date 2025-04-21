@@ -29,9 +29,9 @@ export default function ExploreScreen() {
   ];
 
   return (
-    <View className="flex-1 bg-gray-100 px-4 pt-6">
+    <View className="flex-1 bg-gray-100 px-4 pt-6 mt-10 ">
       {/* Header */}
-      <Text className="text-2xl font-bold mb-4">Explore</Text>
+      <Text className="text-4xl font-semibold text-black mb-5">Explore</Text>
 
       {/* Toggle Buttons */}
       <View className="flex-row mb-4">
@@ -48,9 +48,11 @@ export default function ExploreScreen() {
 
       {/* Search Bar */}
       <TextInput
-        placeholder="Type in a pattern or dzongkhag"
-        className="bg-white p-3 rounded-lg shadow mb-4"
-      />
+  placeholder="Type in a pattern or dzongkhag"
+  placeholderTextColor="#9ca3af"
+  className="bg-white px-4 py-3 rounded-lg border border-gray-300 text-base text-gray-800 mb-4"
+/>
+
 
       {/* Textiles List (1 Image Per Row) */}
       <FlatList

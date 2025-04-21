@@ -69,13 +69,13 @@ export default function Profile() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-row justify-between ml-2 items-center mb-8 mt-5">
       <ScrollView>
         {/* Header */}
-        <Text className="text-2xl font-bold p-4">Profile</Text>
+        <Text className="text-4xl font-semibold text-black">Profile</Text>
 
         {/* Profile Section */}
-        <View className="bg-white mb-4 p-4">
+        <View className="mb-4 p-4 mt-4">
           <View className="flex-row items-center mb-4">
             <Image 
               source={{ uri: userData.profileImage }} 
