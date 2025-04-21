@@ -8,7 +8,7 @@ export interface Region {
  imageUrl?: string;
  labelX: number;
     labelY: number;
-
+    fillColor?: string;
 
  }
  
@@ -21,7 +21,7 @@ export interface Region {
         , population: 46000,
         labelX: 630,
     labelY: 40,
-
+ fillColor: "#FFB6C1"
 
       },
    {
@@ -31,7 +31,7 @@ export interface Region {
       , population: 46453500,
       labelX: 630,
       labelY: 40,
- 
+   fillColor: "#8B0000"
    },
    {
       id: "BT-13", 
@@ -40,7 +40,7 @@ export interface Region {
    , population: 46000,
    labelX: 630,
    labelY: 40,
-
+fillColor: "#5F9EA0"
 },
 {
    id: "BT-23", 
@@ -49,6 +49,7 @@ d:"m 210.64556,144.61095 1.91,-3.17 3.71,0.5 2.46,-1.09 6.27,2.37 2.04,-0.85 3.7
 , population: 46000,
 labelX: 630,
 labelY: 40,
+fillColor: "#2F4F4F"
  },
 {
    id: "BT-14", 
@@ -57,6 +58,7 @@ d: "m 35.445559,255.33095 1.87,1.53 4.53,1.35 5.63,3.53 1.03,3.24 2.4,3.48 5.98,
 , population: 46000,
 labelX: 630,
 labelY: 40,
+fillColor: "#556B2F" 
 },
 {
    id: "BT-15", 
@@ -65,6 +67,7 @@ name: 'Thimphu',
          , population: 46000,
          labelX: 630,
          labelY: 40,
+ fillColor: "#6B8E23"
 },
 {
    id: "BT-21", 
@@ -73,6 +76,7 @@ d: "m 311.67556,297.40095 0.78,-1.62 -1.51,-3.02 0.51,-2.91 1.26,-2.03 -0.75,-1.
 , population: 46000,
 labelX: 630,
 labelY: 40,
+fillColor: "#483D8B"
 },
 {
    id: "BT-22",
@@ -81,6 +85,7 @@ name: 'Dagana',
    , population: 46000,
    labelX: 630,
    labelY: 40,
+fillColor: "#8B008B"
 },
 {
    id: "BT-24", 
@@ -89,6 +94,7 @@ name: 'Wangdue Phodrang',
      , population: 46000,
      labelX: 630,
      labelY: 40,
+     fillColor: "#800080" 
 },
 {
    id: "BT-31", 
@@ -97,6 +103,7 @@ name: 'Sarpang',
    , population: 46000,
    labelX: 630,
    labelY: 40,
+fillColor: "#191970"
 },
  {
    id: "BT-32", 
@@ -105,6 +112,7 @@ name: 'Trongsa',
     , population: 46000,
     labelX: 630,
     labelY: 40,
+fillColor: "#4682B4"
 },
 {
    id: "BT-33", 
@@ -113,6 +121,7 @@ name: 'Bumthang',
    , population: 46000,
    labelX: 630,
    labelY: 40,
+fillColor: "#8B4513"
 },
 {
    id: "BT-34", 
@@ -121,6 +130,7 @@ d: "m 468.02556,231.70095 3.73,-3.28 5.71,-0.73 2.36,0.55 2.61,2.99 2.8,1.95 0.9
 , population: 46000,
 labelX: 630,
 labelY: 40,
+fillColor: "#9932CC"
 },
 {
    id: "BT-41", 
@@ -129,6 +139,7 @@ d:"m 748.49556,204.09095 2.27,0.81 1.95,-0.1 2.21,-1.19 3.65,0 1.4,-1.81 0.72,-3
 , population: 46000,
 labelX: 630,
 labelY: 40,
+fillColor: "#2E8B57"
 },
 {
    id: "BT-42", 
@@ -137,6 +148,7 @@ name: 'Monggar',
      , population: 46000,
      labelX: 630,
      labelY: 40,
+     fillColor: "#DC143C" 
 },
 {
    id: "BT-43", 
@@ -145,6 +157,7 @@ name: 'Pemagatshel',
  , population: 46000,
  labelX: 630,
  labelY: 40,
+fillColor: "#B22222"
 },
 
 {
@@ -154,6 +167,7 @@ name: 'Lhuentse',
     , population: 46000,
     labelX: 630,
     labelY: 40,
+fillColor: "#008080"
 },
 {
    id: "BT-45", 
@@ -162,6 +176,7 @@ name: 'Samdrup Jongkhar',
    , population: 46000,
    labelX: 630,
    labelY: 40,
+fillColor: "#3CB371"
 },
 {
    id: "BT-46",
@@ -170,6 +185,7 @@ name: 'Gasa',
     , population: 46000,
     labelX: 630,
     labelY: 40,
+fillColor: "#5D3FD3"
 },
 {
    id: "BT-47",
@@ -178,6 +194,7 @@ name: 'Trashi Yangtse',
     , population: 46000,
     labelX: 630,
     labelY: 40,
+fillColor: "#6A5ACD"
 },
    ]
       
