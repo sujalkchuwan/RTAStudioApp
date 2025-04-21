@@ -38,9 +38,12 @@ export default function ExploreScreen() {
         <TouchableOpacity className="bg-red-200 px-4 py-2 rounded-lg mr-2">
           <Text className="text-red-500">List</Text>
         </TouchableOpacity>
-        <TouchableOpacity className="bg-gray-200 px-4 py-2 rounded-lg">
-          <Text className="text-gray-600">Map</Text>
-        </TouchableOpacity>
+        <TouchableOpacity
+  className="bg-gray-200 px-4 py-2 rounded-lg"
+  onPress={() => router.push(`/exploremap.`)}
+>
+  <Text className="text-gray-600">Map</Text>
+</TouchableOpacity>
       </View>
 
       {/* Search Bar */}
