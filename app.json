@@ -5,20 +5,16 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "rta_mobile_app",
     "deepLinking": true,
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-       "intentFilters": [
+      "intentFilters": [
         {
           "action": "VIEW",
           "data": {
-            "scheme": "myapp",
+            "scheme": "rta_mobile_app",
             "host": "auth"
           },
           "category": ["BROWSABLE", "DEFAULT"]
@@ -30,7 +26,7 @@
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["myapp"]
+            "CFBundleURLSchemes": ["rta_mobile_app"]
           }
         ]
       }

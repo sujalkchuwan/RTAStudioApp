@@ -1,52 +1,29 @@
 import { images } from "@/constants/images";
-import { Link, useRouter } from "expo-router";
 import {
   View,
   Text,
   ImageBackground,
   Image,
   TouchableOpacity,
-  Linking as RNLinking,
 } from "react-native";
-import { useEffect, useState } from "react";
 import * as Linking from "expo-linking";
-// import * as SecureStore from "expo-secure-store"; // optional
+import { Link, useRouter } from "expo-router";
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const [authToken, setAuthToken] = useState<string | null>(null);
-
-  // Handle deep links from login
-  useEffect(() => {
-    const handleDeepLink = (event: Linking.EventType & { url: string }) => {
-      const { queryParams } = Linking.parse(event.url);
-      const token = queryParams?.token;
-
-      // if (token) {
-      //   setAuthToken(token);
-      // Optional: SecureStore.setItemAsync('authToken', token);
-      router.replace("/(tabs)");
-      // }
-    };
-
-    const subscription = Linking.addEventListener("url", handleDeepLink);
-
-    // Also handle cold starts
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink({ url } as Linking.EventType & { url: string });
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
 
   const handleLogin = () => {
-    RNLinking.openURL("https://rta-studio.vercel.app/signin");
+    const redirectURL = Linking.createURL("/auth");
+    const loginURL = "https://rta-studio.vercel.app/signin?from=mobile";
+    Linking.openURL(loginURL);
   };
 
   const handleSignup = () => {
-    RNLinking.openURL("https://rta-studio.vercel.app/signin");
+    const redirectURL = Linking.createURL("/auth");
+    const signupURL = `https://rta-studio.vercel.app/signup?redirect=${encodeURIComponent(
+      redirectURL
+    )}`;
+    Linking.openURL(signupURL);
   };
 
   return (
@@ -78,12 +55,9 @@ export default function WelcomeScreen() {
           Sign up
         </Text>
       </TouchableOpacity>
-
-      <View className="mt-10 left-0 right-0 flex-row justify-center">
-        <Link href="/(tabs)" className="text-white">
-          Go to Tabs?
-        </Link>
-      </View>
+      <Link href="/(tabs)" className="absolute bottom-20">
+        <Text className=" text-white">Go to Tabs?</Text>
+      </Link>
     </ImageBackground>
   );
 }

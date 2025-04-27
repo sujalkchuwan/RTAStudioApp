@@ -1,24 +1,22 @@
 import { useEffect } from "react";
-import { useRouter, useGlobalSearchParams } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const { token } = useGlobalSearchParams();
+  const { token } = useLocalSearchParams();
 
   useEffect(() => {
     const saveToken = async () => {
-      if (token) {
-        await AsyncStorage.setItem("authToken", token as string);
-        router.replace("/(tabs)"); // go to your main screen
+      if (token && typeof token === "string") {
+        await SecureStore.setItemAsync("authToken", token);
+        router.replace("/(tabs)");
       } else {
-        // fallback if token is missing
-        router.replace("/");
+        router.replace("/"); // fallback
       }
     };
-
     saveToken();
   }, [token]);
 
-  return null; // or a loading spinner
+  return null;
 }

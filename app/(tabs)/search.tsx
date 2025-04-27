@@ -6,80 +6,39 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { images } from "@/constants/images";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { formatDistanceToNow } from "date-fns";
 
-export default function search() {
-  const sharedFiles = [
-    {
-      id: "1",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "2",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "3",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "4",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "5",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-  ];
+// Replace these later with your backend URLs
+const TEMP_API_USER_ID = "cm9lsphc90000nzza1axab7q1"; // Replace with actual user ID from auth context
+const TEMP_API_URL = "https://rta-studio.vercel.app/api"; // Replace when backend is ready
 
-  const userProjects = [
-    {
-      id: "1",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "2",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "3",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "4",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "5",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-    {
-      id: "6",
-      image:
-        "https://tse4.mm.bing.net/th?id=OIP.PEufYV0wYNWXvPxJ32Ih0wHaFe&pid=Api",
-      name: "Textile Design 1",
-    },
-  ];
+export default function Search() {
+  const [sharedFiles, setSharedFiles] = useState([]);
+  const [userProjects, setUserProjects] = useState([]);
+
+  const fetchRoomsAndInvites = async () => {
+    try {
+      // Fetch owned rooms
+      const ownedRes = await axios.get(
+        "https://rta-studio.vercel.app/api/rooms/cm9lsphc90000nzza1axab7q1"
+      );
+      setUserProjects(ownedRes.data);
+
+      // Fetch room invites
+      const inviteRes = await axios.get(
+        "https://rta-studio.vercel.app/api/rooms/cm9lsphc90000nzza1axab7q1"
+      );
+      setSharedFiles(inviteRes.data);
+    } catch (error) {
+      console.error("Error fetching rooms:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoomsAndInvites();
+  }, []);
 
   return (
     <View className="flex-1 bg-gray-100 px-4 pt-6 gap-4">
@@ -96,14 +55,17 @@ export default function search() {
         data={sharedFiles}
         horizontal
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.room.id}
         renderItem={({ item }) => (
           <TouchableOpacity className="mr-4">
             <Image
-              source={{ uri: item.image }}
-              className="w-32 h-24 rounded-lg"
+              source={{ uri: "" }} // Empty for now, image not implemented
+              className="w-32 h-24 rounded-lg bg-gray-300"
             />
-            <Text className="text-sm font-medium">{item.name}</Text>
+            <Text className="text-sm font-medium">{item.room.title}</Text>
+            <Text className="text-xs text-gray-500">
+              {formatDistanceToNow(new Date(item.room.createdAt))} ago
+            </Text>
           </TouchableOpacity>
         )}
       />
@@ -117,12 +79,14 @@ export default function search() {
         renderItem={({ item }) => (
           <TouchableOpacity className="mb-4 flex-row items-center">
             <Image
-              source={{ uri: item.image }}
-              className="w-32 h-24 rounded-lg mr-3"
+              source={{ uri: "" }} // Empty for now, image not implemented
+              className="w-32 h-24 rounded-lg mr-3 bg-gray-300"
             />
             <View>
-              <Text className="text-base font-medium">{item.name}</Text>
-              <Text className="text-gray-500 text-sm">Viewed an hour ago</Text>
+              <Text className="text-base font-medium">{item.title}</Text>
+              <Text className="text-gray-500 text-sm">
+                {formatDistanceToNow(new Date(item.createdAt))} ago
+              </Text>
             </View>
           </TouchableOpacity>
         )}
