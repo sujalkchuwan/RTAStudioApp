@@ -1,5 +1,5 @@
-import { View, Text, ImageBackground, Image } from "react-native";
 import React from "react";
+import { View, Text, ImageBackground, Image, StatusBar } from "react-native";
 import { Tabs } from "expo-router";
 import { images } from "@/constants/images";
 import { icons } from "@/constants/icons";
@@ -7,7 +7,7 @@ import { icons } from "@/constants/icons";
 const TabIcon = ({ focused, icon, title }: any) => {
   if (focused) {
     return (
-      <ImageBackground className="lex flex-row w-full flex-1 min-w-[112px] min-h-16 justify-center items-center rounded-full bg-white">
+      <ImageBackground className="flex flex-row w-full flex-1 min-w-[112px] min-h-16 justify-center items-center rounded-full bg-white">
         <Text className="text-red-500 text-lg font-semibold">{title}</Text>
       </ImageBackground>
     );
@@ -23,6 +23,9 @@ const TabIcon = ({ focused, icon, title }: any) => {
 const _layout = () => {
   return (
     <>
+      {/* ✅ StatusBar with dark icons and light background */}
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+
       <Tabs
         screenOptions={{
           tabBarShowLabel: false,
@@ -31,18 +34,16 @@ const _layout = () => {
             height: "100%",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: 0,
           },
           tabBarStyle: {
-            backgroundColor: "#ffff",
+            backgroundColor: "#ffffff",
             borderRadius: 5,
             marginHorizontal: 1,
-
             height: 92,
             position: "absolute",
             overflow: "hidden",
             borderWidth: 1,
-            borderColor: "#fff",
+            borderColor: "#ffffff",
           },
         }}
       >
@@ -69,7 +70,7 @@ const _layout = () => {
         <Tabs.Screen
           name="explore"
           options={{
-            title: "explore",
+            title: "Explore",
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabIcon focused={focused} icon={icons.save} title="Explore" />

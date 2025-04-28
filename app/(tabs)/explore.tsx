@@ -57,8 +57,8 @@ export default function ExploreScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-100 px-4 pt-6">
-      <Text className="text-2xl font-bold mb-4">Explore</Text>
+    <View className="flex-1 bg-gray-100 px-4 pt-6 mt-10 ">
+      <Text className="text-4xl font-semibold text-black mb-5">Explore</Text>
 
       <View className="flex-row mb-4">
         <TouchableOpacity className="bg-red-200 px-4 py-2 rounded-lg mr-2">
