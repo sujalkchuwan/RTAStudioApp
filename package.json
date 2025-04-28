@@ -59,7 +59,6 @@
     "react-native-webview": "13.12.5",
     "reanimated": "^0.0.1-alpha",
     "tailwindcss": "^3.4.17",
-    "undefined": "\\react-native-svg@15.8.0",
     "expo-auth-session": "~6.0.3"
   },
   "devDependencies": {
