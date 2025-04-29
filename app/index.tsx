@@ -8,22 +8,39 @@ import {
 } from "react-native";
 import * as Linking from "expo-linking";
 import { Link, useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
 
 export default function WelcomeScreen() {
   const router = useRouter();
 
-  const handleLogin = () => {
-    const redirectURL = Linking.createURL("/auth");
-    const loginURL = "https://rta-studio.vercel.app/signin?from=mobile";
-    Linking.openURL(loginURL);
-  };
+  const handleLogin = async () => {
+    const redirectURL = Linking.createURL("/auth/callback"); // THIS MUST MATCH your callback screen!
 
-  const handleSignup = () => {
-    const redirectURL = Linking.createURL("/auth");
-    const signupURL = `https://rta-studio.vercel.app/signup?redirect=${encodeURIComponent(
+    const loginURL = `https://rta-studio.vercel.app/signin?from=mobile&redirect=${encodeURIComponent(
       redirectURL
     )}`;
-    Linking.openURL(signupURL);
+
+    const result = await WebBrowser.openAuthSessionAsync(loginURL, redirectURL);
+    console.log("WebBrowser result:", result); // Log the result
+
+    if (result.type === "success") {
+      console.log("Redirect to mobile app success");
+    } else if (result.type === "dismiss" || result.type === "cancel") {
+      console.log("User dismissed the login flow");
+    } else {
+      console.log("Unexpected result type:", result.type);
+    }
+  };
+
+  const handleSignup = async () => {
+    const signupURL = `https://rta-studio.vercel.app/signup?redirect=${encodeURIComponent(
+      Linking.createURL("/auth")
+    )}`;
+    await WebBrowser.openAuthSessionAsync(
+      signupURL,
+      Linking.createURL("/auth")
+    );
   };
 
   return (
