@@ -11,27 +11,50 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+
+type UserData = {
+  avatar: string;
+  username: string;
+  email: string;
+};
 
 export default function Profile() {
-  const [userData, setUserData] = useState(null);
-  const [sessions, setSessions] = useState([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  type Session = { deviceName: string; ipAddress: string };
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const storedData = await AsyncStorage.getItem("userInfo"); // Assumes userInfo contains user & sessions
-        if (storedData) {
-          const parsed = JSON.parse(storedData);
-          setUserData(parsed.user);
-          setSessions(parsed.sessions || []);
+        const storedUser = await SecureStore.getItemAsync("usedData");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+        if (parsedUser) {
+          setUserData({
+            ...parsedUser,
+            avatar: "https://via.placeholder.com/150", // Dummy avatar
+          });
+
+          // Dummy session data
+          setSessions([
+            {
+              deviceName: "iPhone 14 Pro",
+              ipAddress: "192.168.1.5",
+            },
+            {
+              deviceName: "Chrome on MacBook",
+              ipAddress: "192.168.1.10",
+            },
+          ]);
         }
       } catch (error) {
         console.error("Error loading user profile:", error);
       }
     };
+
     fetchUserData();
   }, []);
 
@@ -45,7 +68,7 @@ export default function Profile() {
 
   const handleSignOutAll = () => {
     console.log("Signing out of all sessions...");
-    // API call to sign out of all sessions
+    // You can add actual API logic here
   };
 
   const handleDeleteAccount = () => {
@@ -55,21 +78,21 @@ export default function Profile() {
   const confirmDelete = () => {
     console.log("Deleting account...");
     setShowDeleteModal(false);
-    // Add delete logic here
+    // Add deletion logic here
   };
 
   return (
-    <SafeAreaView className="flex-row justify-between ml-2 items-center mb-8 mt-5">
-      <ScrollView>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="p-4">
         {/* Header */}
-        <Text className="text-4xl font-semibold text-black">Profile</Text>
+        <Text className="text-4xl font-semibold text-black mb-6">Profile</Text>
 
         {/* Profile Section */}
-        <View className="mb-4 p-4 mt-4">
+        <View className="mb-4 p-4 bg-gray-50 rounded-lg">
           <View className="flex-row items-center mb-4">
             <Image
               source={{
-                uri: userData.avatar || "https://via.placeholder.com/150",
+                uri: userData.avatar,
               }}
               className="w-16 h-16 rounded-full mr-3"
             />
@@ -91,7 +114,7 @@ export default function Profile() {
         </View>
 
         {/* Signed-In Devices */}
-        <View className="bg-white mb-4 p-4">
+        <View className="bg-white mb-4 p-4 rounded-lg">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold">Signed In Devices</Text>
             <TouchableOpacity onPress={handleSignOutAll}>

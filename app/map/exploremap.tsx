@@ -9,7 +9,7 @@ import Svg, {
   Filter,
   FeGaussianBlur,
 } from "react-native-svg";
-import { regions } from "./map";
+import { regions } from "@/map";
 
 const { width, height } = Dimensions.get("window");
 

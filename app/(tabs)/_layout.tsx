@@ -1,7 +1,6 @@
 import React from "react";
 import { View, Text, ImageBackground, Image, StatusBar } from "react-native";
 import { Tabs } from "expo-router";
-import { images } from "@/constants/images";
 import { icons } from "@/constants/icons";
 
 const TabIcon = ({ focused, icon, title }: any) => {
@@ -23,7 +22,6 @@ const TabIcon = ({ focused, icon, title }: any) => {
 const _layout = () => {
   return (
     <>
-      {/* ✅ StatusBar with dark icons and light background */}
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
       <Tabs
