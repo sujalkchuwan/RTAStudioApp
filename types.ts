@@ -4,67 +4,157 @@ export type Color = {
   b: number;
 };
 
+export type Camera = {
+  x: number;
+  y: number;
+  zoom: number;
+};
+
 export enum LayerType {
   Rectangle,
   Ellipse,
   Path,
+  Text,
+  Image,
   Group,
-  // No Text or Image needed if not used
 }
 
-export type RectangleLayer = {
-  type: LayerType.Rectangle;
-  name: string;
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-  fill: Color;
-  stroke: Color;
-  opacity: number;
-  cornerRadius?: number;
-  parentId?: string;
-};
-
-export type EllipseLayer = {
-  type: LayerType.Ellipse;
-  name: string;
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-  fill: Color;
-  stroke: Color;
-  opacity: number;
-  parentId?: string;
-};
-
-export type PathLayer = {
-  type: LayerType.Path;
-  name: string;
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-  fill: Color;
-  stroke: Color;
-  opacity: number;
-  points: number[][];
-  parentId?: string;
-};
-
-export type GroupLayer = {
-  type: LayerType.Group;
-  name: string;
+// Shared base layer properties
+export type BaseLayer = {
   id: string;
+  name: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  opacity: number;
+  parentId?: string;
+};
+
+export type ImageLayer = BaseLayer & {
+  type: LayerType.Image;
+  src: string;
+};
+
+export type RectangleLayer = BaseLayer & {
+  type: LayerType.Rectangle;
+  fill: Color;
+  stroke: Color;
+  cornerRadius?: number;
+  strokeWidth?: number;
+  rotation?: number;
+};
+
+export type EllipseLayer = BaseLayer & {
+  type: LayerType.Ellipse;
+  fill: Color;
+  stroke: Color;
+  strokeWidth?: number;
+};
+
+export type PathLayer = BaseLayer & {
+  type: LayerType.Path;
+  fill: Color;
+  stroke: Color;
+  points: number[][];
+  strokewidth?: number;
+};
+
+export type GroupLayer = BaseLayer & {
+  type: LayerType.Group;
+  groupType: "component" | "textile" | "group";
+  children: string[]; // IDs of child layers
+  rotation?: number;
+};
+
+export type TextLayer = BaseLayer & {
+  type: LayerType.Text;
+  text: string;
+  fontSize: number;
+  fontWeight: number;
+  fontFamily: string;
+  fill: Color;
+  stroke: Color;
+};
+
+export type Layer =
+  | RectangleLayer
+  | EllipseLayer
+  | PathLayer
+  | TextLayer
+  | ImageLayer
+  | GroupLayer;
+
+export type Point = {
+  x: number;
+  y: number;
+};
+
+export type XYWH = {
   x: number;
   y: number;
   width: number;
   height: number;
-  opacity: number;
-  groupType: "component" | "textile" | "group";
-  children: string[];
-  parentId?: string;
+  rotation: number;
 };
 
-export type Layer = RectangleLayer | EllipseLayer | PathLayer | GroupLayer;
+export enum Side {
+  Top = 1,
+  Bottom = 2,
+  Left = 4,
+  Right = 8,
+}
+
+export type CanvasState =
+  | {
+      mode: CanvasMode.None;
+    }
+  | {
+      mode: CanvasMode.RightClick;
+    }
+  | {
+      mode: CanvasMode.SelectionNet;
+      origin: Point;
+      current?: Point;
+    }
+  | {
+      mode: CanvasMode.Dragging;
+      origin: Point | null;
+    }
+  | {
+      mode: CanvasMode.Inserting;
+      layerType:
+        | LayerType.Rectangle
+        | LayerType.Ellipse
+        | LayerType.Text
+        | LayerType.Image;
+      imageSrc?: string;
+    }
+  | {
+      mode: CanvasMode.Pencil;
+    }
+  | {
+      mode: CanvasMode.Resizing;
+      initialBounds: XYWH;
+      corner: Side;
+    }
+  | {
+      mode: CanvasMode.Translating;
+      current: Point;
+    }
+  | {
+      mode: CanvasMode.Pressing;
+      origin: Point;
+    };
+
+export enum CanvasMode {
+  None,
+  Dragging,
+  Inserting,
+  Pencil,
+  Resizing,
+  Translating,
+  SelectionNet,
+  Pressing,
+  RightClick,
+}

@@ -2,17 +2,23 @@
 import Rectangle from "./Rectangle";
 import Ellipse from "./Ellipse";
 import Path from "./Path";
-import { Layer, LayerType } from "../../types";
+import { Layer, LayerType } from "@/types";
 import { colorToCss } from "@/utils/utils";
+import { useStorage } from "@liveblocks/react";
 
 export default function LayerComponent({
   id,
-  layer,
 }: {
   id: string;
-  layer: Layer;
   onLayerPointerDown: (e: any, layerId: string) => void;
 }) {
+  const layer = useStorage((root) => root.layers.get(id));
+
+  const layers = useStorage((root) => root.layers);
+
+  console.log("object", layer?.type);
+
+  if (!layer) return null;
   switch (layer.type) {
     case LayerType.Rectangle:
       return <Rectangle id={id} layer={layer} />;

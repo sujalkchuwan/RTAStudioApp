@@ -1,7 +1,7 @@
 // components/canvas/Rectangle.tsx
 import React from "react";
 import { Rect } from "react-native-svg";
-import { RectangleLayer } from "../../types";
+import { RectangleLayer } from "@/types";
 import { colorToCss } from "@/utils/utils";
 
 export default function Rectangle({
@@ -13,6 +13,7 @@ export default function Rectangle({
 }) {
   const { x, y, width, height, fill, stroke, opacity, cornerRadius } = layer;
 
+  console.log("RectangleLayer", layer);
   return (
     <Rect
       x={x}

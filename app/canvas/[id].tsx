@@ -1,8 +1,8 @@
 import { CanvasView } from "@/components/canvas/CanvasView";
 import { useLocalSearchParams } from "expo-router";
 import { RoomProvider } from "@/liveblocks.config";
-import { LiveMap, LiveObject } from "@liveblocks/client";
-import { Layer } from "@/types";
+import { LiveMap, LiveObject, LiveList } from "@liveblocks/client";
+import { Layer, Color } from "@/types";
 
 export default function Canvas() {
   const { id } = useLocalSearchParams();
@@ -10,14 +10,24 @@ export default function Canvas() {
   if (!id || typeof id !== "string") return null;
 
   const initialStorage = {
-    layerIds: [],
+    roomColor: {
+      r: 0,
+      g: 0,
+      b: 0,
+    } as Color,
     layers: new LiveMap<string, LiveObject<Layer>>(),
+    layerIds: new LiveList([]),
   };
 
   return (
     <RoomProvider
       id={`room:${id}`}
-      initialPresence={{}}
+      initialPresence={{
+        selection: [],
+        cursor: null,
+        penColor: null,
+        pencilDraft: null,
+      }}
       initialStorage={initialStorage}
     >
       <CanvasView />

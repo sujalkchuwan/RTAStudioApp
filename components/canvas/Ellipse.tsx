@@ -1,6 +1,6 @@
 // components/canvas/Ellipse.tsx
 import { Ellipse as SvgEllipse } from "react-native-svg";
-import { EllipseLayer } from "../../types";
+import { EllipseLayer } from "@/types";
 import { colorToCss } from "@/utils/utils";
 
 export default function Ellipse({
