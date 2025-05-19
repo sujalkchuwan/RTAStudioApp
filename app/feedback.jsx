@@ -26,10 +26,10 @@ export default function Feedback() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 ">
       <View className="flex-row justify-between items-center p-4 bg-white">
         <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color="#000" />
+          <ArrowLeft size={24} color="white" />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleSend}>
           <Send size={24} color="#FF4B4B" />
