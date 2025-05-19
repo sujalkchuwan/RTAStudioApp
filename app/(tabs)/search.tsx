@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "expo-router";
 
 type Room = {
   id: string;
@@ -24,11 +25,14 @@ type SharedFile = {
 export default function Search() {
   const [sharedFiles, setSharedFiles] = useState<SharedFile[]>([]);
   const [userProjects, setUserProjects] = useState<Room[]>([]);
+  const router = useRouter();
+  const [roomColors, setRoomColors] = useState<Record<string, string>>({});
 
   const fetchFromStorage = async () => {
     try {
       const storedRooms = await SecureStore.getItemAsync("rooms");
       const storedInvites = await SecureStore.getItemAsync("roomInvites");
+      const storedColors = await SecureStore.getItemAsync("roomColors");
 
       if (storedRooms) {
         const parsedRooms = JSON.parse(storedRooms);
@@ -39,7 +43,12 @@ export default function Search() {
         const parsedInvites = JSON.parse(storedInvites);
         setSharedFiles(parsedInvites);
       } else {
-        setSharedFiles([]); // default to empty
+        setSharedFiles([]);
+      }
+
+      if (storedColors) {
+        const parsedColors = JSON.parse(storedColors);
+        setRoomColors(parsedColors);
       }
     } catch (error) {
       console.error("Error loading search data:", error);
@@ -73,11 +82,21 @@ export default function Search() {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.room?.id || item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity className="mr-4">
-              <Image
-                source={{ uri: "" }}
-                className="w-32 h-24 rounded-lg bg-gray-300"
+            <TouchableOpacity
+              className="mr-4"
+              onPress={() => {
+                if (item.room?.id) {
+                  router.push(`/canvas/${item.room.id}`);
+                }
+              }}
+            >
+              <View
+                className="w-32 h-24 rounded-lg mb-1"
+                style={{
+                  backgroundColor: roomColors[item.room?.id || ""] || "#e5e7eb",
+                }} // fallback gray
               />
+
               <Text className="text-sm font-medium">
                 {item.room?.title || "Untitled"}
               </Text>
@@ -101,11 +120,17 @@ export default function Search() {
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity className="mb-4 flex-row items-center">
-              <Image
-                source={{ uri: "" }}
-                className="w-32 h-24 rounded-lg mr-3 bg-gray-300"
+            <TouchableOpacity
+              className="mb-4 flex-row items-center"
+              onPress={() => {
+                router.push(`/canvas/${item.id}`);
+              }}
+            >
+              <View
+                className="w-32 h-24 rounded-lg mr-3"
+                style={{ backgroundColor: roomColors[item.id] || "#e5e7eb" }}
               />
+
               <View>
                 <Text className="text-base font-medium">{item.title}</Text>
                 <Text className="text-gray-500 text-sm">

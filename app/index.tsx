@@ -5,62 +5,30 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
-  TextInput,
+  ActivityIndicator,
 } from "react-native";
 import * as Linking from "expo-linking";
-import { Link, useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
-import React, { useState } from "react";
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { useEffect, useState } from "react";
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleLogin = async () => {
-    try {
-      const res = await fetch(
-        "https://rta-studio.vercel.app/api/authenticate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            password,
-            from: "mobile",
-            redirect: "rta_mobile_app://callback",
-          }),
-        }
-      );
-      const data = await res.json();
-
-      try {
-        if (!res.ok) {
-          alert("Login failed: " + (data?.error ?? "Unknown error"));
-          return;
-        }
-
-        console.log("data token", data.token);
-        await SecureStore.setItemAsync("authToken", data.token);
-        await SecureStore.setItemAsync("usedData", JSON.stringify(data.user));
-        await SecureStore.setItemAsync("rooms", JSON.stringify(data.rooms));
-        await SecureStore.setItemAsync(
-          "roomInvites",
-          JSON.stringify(data.roomInvites || [])
-        );
-        alert("Login successful!");
-        router.replace("/(tabs)");
-      } catch (jsonError) {
-        console.log("Could not parse response as JSON:", data);
-        alert("Server returned invalid response.");
-      }
-    } catch (err) {
-      console.error("Login error", err);
-      alert("Something went wrong.");
+  const checkIfLoggedIn = async () => {
+    const token = await SecureStore.getItemAsync("authToken");
+    if (token) {
+      router.replace("/(tabs)");
+    } else {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkIfLoggedIn();
+  }, []);
 
   const handleSignup = async () => {
     const signupURL = `https://rta-studio.vercel.app/signup?redirect=${encodeURIComponent(
@@ -71,6 +39,14 @@ export default function WelcomeScreen() {
       Linking.createURL("/auth")
     );
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -84,26 +60,9 @@ export default function WelcomeScreen() {
         resizeMode="contain"
       />
 
-      {/* ✅ Email Input */}
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        className="bg-white px-4 py-2 w-64 rounded-md mb-4"
-      />
-
-      {/* ✅ Password Input */}
-      <TextInput
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        className="bg-white px-4 py-2 w-64 rounded-md mb-4"
-      />
-
-      {/* ✅ Login Button */}
+      {/* ✅ Login Navigation */}
       <TouchableOpacity
-        onPress={handleLogin}
+        onPress={() => router.push("/login")}
         className="bg-main py-3 px-6 rounded-lg w-64 mb-4 mt-8"
       >
         <Text className="text-light text-lg font-[14px] text-center">
@@ -120,11 +79,6 @@ export default function WelcomeScreen() {
           Sign up
         </Text>
       </TouchableOpacity>
-
-      {/* Optional direct nav */}
-      <Link href="/(tabs)" className="absolute bottom-20">
-        <Text className=" text-white">Go to Tabs?</Text>
-      </Link>
     </ImageBackground>
   );
 }

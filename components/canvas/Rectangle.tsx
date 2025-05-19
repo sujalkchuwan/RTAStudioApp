@@ -13,7 +13,6 @@ export default function Rectangle({
 }) {
   const { x, y, width, height, fill, stroke, opacity, cornerRadius } = layer;
 
-  console.log("RectangleLayer", layer);
   return (
     <Rect
       x={x}
@@ -26,6 +25,9 @@ export default function Rectangle({
       opacity={opacity ? opacity / 100 : 1}
       rx={cornerRadius ?? 0}
       ry={cornerRadius ?? 0}
+      transform={`rotate(${layer.rotation ?? 0}, ${
+        layer.x + layer.width / 2
+      }, ${layer.y + layer.height / 2})`}
       // onPress not needed now but you can handle later here
     />
   );

@@ -17,7 +17,10 @@
             "scheme": "rta_mobile_app",
             "host": "auth"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -26,12 +29,13 @@
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["rta_mobile_app"]
+            "CFBundleURLSchemes": [
+              "rta_mobile_app"
+            ]
           }
         ]
       }
     },
-
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -47,7 +51,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

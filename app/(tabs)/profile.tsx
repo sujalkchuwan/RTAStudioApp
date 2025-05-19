@@ -23,7 +23,6 @@ export default function Profile() {
   const [userData, setUserData] = useState<UserData | null>(null);
   type Session = { deviceName: string; ipAddress: string };
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
@@ -38,7 +37,6 @@ export default function Profile() {
             avatar: "https://via.placeholder.com/150", // Dummy avatar
           });
 
-          // Dummy session data
           setSessions([
             {
               deviceName: "iPhone 14 Pro",
@@ -58,17 +56,12 @@ export default function Profile() {
     fetchUserData();
   }, []);
 
-  if (!userData) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center">
-        <Text>Loading profile...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  const handleSignOutAll = () => {
-    console.log("Signing out of all sessions...");
-    // You can add actual API logic here
+  const logout = async () => {
+    await SecureStore.deleteItemAsync("authToken");
+    await SecureStore.deleteItemAsync("usedData");
+    await SecureStore.deleteItemAsync("rooms");
+    await SecureStore.deleteItemAsync("roomInvites");
+    router.replace("/login");
   };
 
   const handleDeleteAccount = () => {
@@ -81,19 +74,23 @@ export default function Profile() {
     // Add deletion logic here
   };
 
+  if (!userData) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center">
+        <Text>Loading profile...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="p-4">
-        {/* Header */}
         <Text className="text-4xl font-semibold text-black mb-6">Profile</Text>
 
-        {/* Profile Section */}
         <View className="mb-4 p-4 bg-gray-50 rounded-lg">
           <View className="flex-row items-center mb-4">
             <Image
-              source={{
-                uri: userData.avatar,
-              }}
+              source={{ uri: userData.avatar }}
               className="w-16 h-16 rounded-full mr-3"
             />
             <View className="flex-1">
@@ -113,11 +110,10 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
-        {/* Signed-In Devices */}
         <View className="bg-white mb-4 p-4 rounded-lg">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold">Signed In Devices</Text>
-            <TouchableOpacity onPress={handleSignOutAll}>
+            <TouchableOpacity onPress={logout}>
               <Text className="text-blue-500 text-sm">Sign Out of All...</Text>
             </TouchableOpacity>
           </View>
@@ -140,14 +136,16 @@ export default function Profile() {
                   {device.ipAddress}
                 </Text>
               </View>
-              <TouchableOpacity className="bg-gray-100 py-2 px-4 rounded-md">
+              <TouchableOpacity
+                className="bg-gray-100 py-2 px-4 rounded-md"
+                onPress={logout}
+              >
                 <Text className="text-sm">Sign out</Text>
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
-        {/* Bottom buttons */}
         <View className="p-4 pb-32">
           <TouchableOpacity
             className="border border-red-500 p-4 rounded-lg items-center mb-6"
@@ -167,7 +165,6 @@ export default function Profile() {
         </View>
       </ScrollView>
 
-      {/* Delete Modal */}
       <Modal
         animationType="fade"
         transparent={true}

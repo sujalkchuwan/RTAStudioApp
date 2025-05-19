@@ -11,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Menu, Provider } from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 import { useRouter } from "expo-router";
+import { generateLightColor } from "@/utils/color";
 
 type Room = {
   id: string;
@@ -33,16 +34,34 @@ const Recents = () => {
         const storedRooms = await SecureStore.getItemAsync("rooms");
         const parsedRooms = storedRooms ? JSON.parse(storedRooms) : [];
 
-        // Add dummy data for display
+        const storedColors = await SecureStore.getItemAsync("roomColors");
+        const roomColors = storedColors ? JSON.parse(storedColors) : {};
+
+        let updated = false;
+
         const augmentedRooms = parsedRooms.map(
-          (room: { id: any; title: any }) => ({
-            id: room.id,
-            name: room.title || "Untitled",
-            designer: "John Doe", // dummy
-            image: "https://via.placeholder.com/150", // dummy
-            lastViewedAt: new Date().toISOString(), // dummy
-          })
+          (room: { id: string; title: string }) => {
+            if (!roomColors[room.id]) {
+              roomColors[room.id] = generateLightColor();
+              updated = true;
+            }
+
+            return {
+              id: room.id,
+              name: room.title || "Untitled",
+              designer: "John Doe",
+              image: roomColors[room.id], // use color as image for now
+              lastViewedAt: new Date().toISOString(),
+            };
+          }
         );
+
+        if (updated) {
+          await SecureStore.setItemAsync(
+            "roomColors",
+            JSON.stringify(roomColors)
+          );
+        }
 
         setRooms(augmentedRooms);
       } catch (err) {
@@ -117,10 +136,13 @@ const Recents = () => {
             >
               <View className="flex-row p-5 bg-white rounded-lg mb-3 items-center">
                 <View className="flex-row flex-1 items-center">
-                  <Image
-                    source={{ uri: item.image }}
-                    className="w-20 h-20 rounded-lg mr-4"
+                  <View
+                    className="w-32 h-24 rounded-lg mr-3"
+                    style={{
+                      backgroundColor: item.image,
+                    }}
                   />
+
                   <View>
                     <Text className="text-lg font-semibold text-gray-900">
                       {item.name}
