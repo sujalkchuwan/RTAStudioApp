@@ -1,4 +1,3 @@
-// components/canvas/Ellipse.tsx
 import { Ellipse as SvgEllipse } from "react-native-svg";
 import { EllipseLayer } from "@/types";
 import { colorToCss } from "@/utils/utils";
@@ -6,9 +5,11 @@ import { colorToCss } from "@/utils/utils";
 export default function Ellipse({
   id,
   layer,
+  onPress, // Added onPress prop
 }: {
   id: string;
   layer: EllipseLayer;
+  onPress?: () => void; // Made onPress optional
 }) {
   const { x, y, width, height, fill, stroke, opacity } = layer;
 
@@ -22,6 +23,7 @@ export default function Ellipse({
       stroke={stroke ? colorToCss(stroke) : "#ccc"}
       strokeWidth={1}
       opacity={opacity ? opacity / 100 : 1}
+      onPress={onPress} // Applied onPress to the SvgEllipse element
     />
   );
 }

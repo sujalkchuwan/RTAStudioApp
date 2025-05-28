@@ -1,49 +1,7 @@
-// // components/canvas/LayerComponent.tsx
-// import Rectangle from "./Rectangle";
-// import Ellipse from "./Ellipse";
-// import Path from "./Path";
-// import { Layer, LayerType } from "@/types";
-// import { colorToCss } from "@/utils/utils";
-// import { useStorage } from "@liveblocks/react";
-
-// export default function LayerComponent({
-//   id,
-// }: {
-//   id: string;
-//   onLayerPointerDown: (e: any, layerId: string) => void;
-// }) {
-//   const layer = useStorage((root) => root.layers.get(id));
-
-//   const layers = useStorage((root) => root.layers);
-
-//   console.log("object", layer?.type);
-
-//   if (!layer) return null;
-//   switch (layer.type) {
-//     case LayerType.Rectangle:
-//       return <Rectangle id={id} layer={layer} />;
-//     case LayerType.Ellipse:
-//       return <Ellipse id={id} layer={layer} />;
-//     case LayerType.Path:
-//       return (
-//         <Path
-//           x={layer.x}
-//           y={layer.y}
-//           points={layer.points}
-//           fill={colorToCss(layer.fill)}
-//           stroke={colorToCss(layer.stroke)}
-//           opacity={layer.opacity}
-//         />
-//       );
-//     default:
-//       return null;
-//   }
-// }
-
 import { useStorage } from "@/liveblocks.config";
-import Rectangle from "./Rectangle";
-import Ellipse from "./Ellipse";
-import Path from "./Path";
+import Rectangle from "./Rectangle"; // Assuming this accepts an 'onPress' prop
+import Ellipse from "./Ellipse"; // Assuming this accepts an 'onPress' prop
+import Path from "./Path"; // Assuming this accepts an 'onPress' prop
 import { Layer, LayerType } from "@/types";
 import { colorToCss } from "@/utils/utils";
 import { G, Text as SvgText, Rect } from "react-native-svg";
@@ -80,10 +38,10 @@ function getGroupBoundingBox(
 
 export default function LayerComponent({
   id,
-  onLayerPointerDown,
+  onLayerPointerDown, // Changed type to only expect layerId
 }: {
   id: string;
-  onLayerPointerDown: (e: any, layerId: string) => void;
+  onLayerPointerDown: (layerId: string) => void; // Simplified signature
 }) {
   const layer = useStorage((root) => root.layers.get(id));
   const layers = useStorage((root) => root.layers);
@@ -92,9 +50,21 @@ export default function LayerComponent({
 
   switch (layer.type) {
     case LayerType.Rectangle:
-      return <Rectangle id={id} layer={layer} />;
+      return (
+        <Rectangle
+          id={id}
+          layer={layer}
+          onPress={() => onLayerPointerDown(id)} // Added onPress
+        />
+      );
     case LayerType.Ellipse:
-      return <Ellipse id={id} layer={layer} />;
+      return (
+        <Ellipse
+          id={id}
+          layer={layer}
+          onPress={() => onLayerPointerDown(id)} // Added onPress
+        />
+      );
     case LayerType.Path:
       return (
         <Path
@@ -104,6 +74,7 @@ export default function LayerComponent({
           fill={colorToCss(layer.fill)}
           stroke={colorToCss(layer.stroke)}
           opacity={layer.opacity}
+          onPress={() => onLayerPointerDown(id)} // Added onPress
         />
       );
     case LayerType.Text:
@@ -118,6 +89,7 @@ export default function LayerComponent({
           opacity={layer.opacity / 100}
           fontFamily={layer.fontFamily}
           fontWeight={layer.fontWeight?.toString() || "400"}
+          onPress={() => onLayerPointerDown(id)} // Added onPress
         >
           {layer.text}
         </SvgText>
@@ -142,6 +114,7 @@ export default function LayerComponent({
             stroke={stroke}
             strokeWidth={2}
             fill="transparent"
+            onPress={() => onLayerPointerDown(id)} // Added onPress to make group bounding box selectable
           />
           {layer.children.map((childId: string) => (
             <LayerComponent

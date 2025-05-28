@@ -33,13 +33,17 @@ export default function NumberInput({
 }
 
 const styles = StyleSheet.create({
-  container: { marginVertical: 8 },
+  container: {
+    marginBottom: 8, // Changed from marginVertical to marginBottom
+    marginRight: 8, // Added margin to the right for horizontal spacing
+    flex: 1, // Retained flex: 1 to make the input wide
+  },
   label: { fontSize: 12, marginBottom: 4 },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
-    padding: 6,
-    fontSize: 14,
+    padding: 10,
+    fontSize: 16,
   },
 });

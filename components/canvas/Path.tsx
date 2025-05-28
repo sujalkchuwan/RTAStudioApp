@@ -1,4 +1,3 @@
-// components/canvas/Path.tsx
 import { Path as SvgPath } from "react-native-svg";
 import { getStroke } from "perfect-freehand";
 import { getSvgPathFromStroke } from "@/utils/utils"; // same file for now
@@ -10,6 +9,7 @@ export default function Path({
   fill,
   stroke,
   opacity,
+  onPress, // Added onPress prop
 }: {
   x: number;
   y: number;
@@ -17,6 +17,7 @@ export default function Path({
   fill: string;
   stroke?: string;
   opacity: number;
+  onPress?: () => void; // Made onPress optional
 }) {
   const pathData = getSvgPathFromStroke(
     getStroke(points, {
@@ -35,6 +36,7 @@ export default function Path({
       strokeWidth={1}
       opacity={opacity ? opacity / 100 : 1}
       transform={`translate(${x}, ${y})`}
+      onPress={onPress} // Applied onPress to the SvgPath element
     />
   );
 }

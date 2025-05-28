@@ -10,8 +10,11 @@ export default function RootLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="explore/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="map/exploremap" options={{ headerShown: false }} />
-      <Stack.Screen name="canvas/[id]" options={{ headerShown: false }} />
+      {/* <Stack.Screen name="exploremap" options={{ headerShown: false }} /> */}
+      <Stack.Screen
+        name="canvas/[id]"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
       <Stack.Screen name="login" options={{ headerShown: false }} />
     </Stack>
   );

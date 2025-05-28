@@ -81,14 +81,6 @@ export default function ExploreScreen() {
       });
   }, []);
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="gray" />
-      </View>
-    );
-  }
-
   return (
     <View className="flex-1 bg-gray-100 px-4 pt-6 mt-10 ">
       <Text className="text-4xl font-semibold text-black mb-5">Explore</Text>
@@ -99,7 +91,7 @@ export default function ExploreScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           className="bg-gray-200 px-4 py-2 rounded-lg"
-          onPress={() => router.push("/map/exploremap")}
+          onPress={() => router.push("/exploremap")}
         >
           <Text className="text-gray-600">Map</Text>
         </TouchableOpacity>
@@ -112,247 +104,257 @@ export default function ExploreScreen() {
         onChangeText={setSearchQuery}
       />
 
-      <FlatList
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-        data={filteredTextiles}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          if (!colorCache[item.id]) {
-            colorCache[item.id] = {
-              durationColor: generateLightColor(),
-              nameColor: generateLightColor(),
-            };
-          }
-          const { durationColor, nameColor } = colorCache[item.id];
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="gray" />
+        </View>
+      ) : (
+        <FlatList
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          data={filteredTextiles}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => {
+            if (!colorCache[item.id]) {
+              colorCache[item.id] = {
+                durationColor: generateLightColor(),
+                nameColor: generateLightColor(),
+              };
+            }
+            const { durationColor, nameColor } = colorCache[item.id];
 
-          return (
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "/explore/[id]",
-                  params: {
-                    id: item.id,
-                    textile: JSON.stringify(item),
-                  },
-                })
-              }
-            >
-              <View
-                style={{
-                  width: screenWidth - 32,
-                  backgroundColor: "white",
-                  borderRadius: 12,
-                  padding: 8,
-                  marginBottom: 16,
-                  alignSelf: "center",
-                  overflow: "hidden",
-                }}
+            return (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "/explore/[id]",
+                    params: {
+                      id: item.id,
+                      textile: JSON.stringify(item),
+                    },
+                  })
+                }
               >
-                {/* ROW 1 */}
-                <View style={{ flexDirection: "row", height: 220 }}>
-                  {/* Column 1 */}
-                  <View style={{ flex: 2, marginRight: 8 }}>
-                    {/* Row 1: Duration + Textile Name */}
-                    <View
-                      style={{ flex: 1, flexDirection: "row", marginBottom: 4 }}
-                    >
-                      <View
-                        style={{
-                          flex: 1,
-                          justifyContent: "center",
-                          backgroundColor: durationColor,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <Text className="text-xs text-gray-600 text-center">
-                          {item.duration}
-                        </Text>
-                      </View>
-                      <View
-                        style={{
-                          flex: 2,
-                          justifyContent: "center",
-                          alignItems: "center",
-                          backgroundColor: nameColor,
-                          borderRadius: 8,
-                          marginLeft: 4,
-                        }}
-                      >
-                        <Text className="text-sm font-semibold text-center">
-                          {item.textileName}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Row 2: Origin Image + Main Image */}
-                    <View style={{ flex: 2, flexDirection: "row" }}>
-                      <View
-                        style={{
-                          flex: 1,
-                          marginRight: 4,
-                          position: "relative",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Image
-                          source={{ uri: item.originImage }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            borderRadius: 8,
-                          }}
-                          resizeMode="cover"
-                        />
-                        <Text className="absolute">{item.origin}</Text>
-                        <Text
-                          className="text-center"
-                          style={{
-                            position: "absolute",
-                            bottom: 6,
-                            color: "white",
-                            fontWeight: "bold",
-                            paddingHorizontal: 6,
-                            paddingVertical: 2,
-                            borderRadius: 4,
-                            fontSize: 10,
-                          }}
-                        >
-                          Origin
-                        </Text>
-                      </View>
-
-                      <View style={{ flex: 2, position: "relative" }}>
-                        <Image
-                          source={{ uri: item.image }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            borderRadius: 12,
-                          }}
-                          resizeMode="cover"
-                        />
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Column 2: Weaving Technique Image */}
-                  <View
-                    style={{
-                      flex: 1,
-                      position: "relative",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      source={{ uri: item.weavingTechniqueImage }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 12,
-                      }}
-                      resizeMode="cover"
-                    />
-                    <Text className="absolute text-white">
-                      {item.weavingTechniqueText}
-                    </Text>
-                    <Text
-                      className="text-center"
-                      style={{
-                        position: "absolute",
-                        top: 6,
-                        color: "white",
-                        fontWeight: "bold",
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        borderRadius: 4,
-                        fontSize: 10,
-                      }}
-                    >
-                      WEAVING TECHNIQUE
-                    </Text>
-                  </View>
-                </View>
-
-                {/* ROW 2 */}
                 <View
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginTop: 8,
+                    width: screenWidth - 32,
+                    backgroundColor: "white",
+                    borderRadius: 12,
+                    padding: 8,
+                    marginBottom: 16,
+                    alignSelf: "center",
+                    overflow: "hidden",
                   }}
                 >
-                  <View
-                    style={{
-                      position: "relative",
-                      width: (screenWidth - 48) / 2,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      source={{ uri: item.motifImage }}
-                      style={{ width: "100%", height: 80, borderRadius: 12 }}
-                      resizeMode="cover"
-                    />
-                    <Text
-                      className="text-center"
+                  {/* ROW 1 */}
+                  <View style={{ flexDirection: "row", height: 220 }}>
+                    {/* Column 1 */}
+                    <View style={{ flex: 2, marginRight: 8 }}>
+                      {/* Row 1: Duration + Textile Name */}
+                      <View
+                        style={{
+                          flex: 1,
+                          flexDirection: "row",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            backgroundColor: durationColor,
+                            borderRadius: 8,
+                          }}
+                        >
+                          <Text className="text-xs text-gray-600 text-center">
+                            {item.duration}
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flex: 2,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: nameColor,
+                            borderRadius: 8,
+                            marginLeft: 4,
+                          }}
+                        >
+                          <Text className="text-sm font-semibold text-center">
+                            {item.textileName}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Row 2: Origin Image + Main Image */}
+                      <View style={{ flex: 2, flexDirection: "row" }}>
+                        <View
+                          style={{
+                            flex: 1,
+                            marginRight: 4,
+                            position: "relative",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Image
+                            source={{ uri: item.originImage }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: 8,
+                            }}
+                            resizeMode="cover"
+                          />
+                          <Text className="absolute">{item.origin}</Text>
+                          <Text
+                            className="text-center"
+                            style={{
+                              position: "absolute",
+                              bottom: 6,
+                              color: "white",
+                              fontWeight: "bold",
+                              paddingHorizontal: 6,
+                              paddingVertical: 2,
+                              borderRadius: 4,
+                              fontSize: 10,
+                            }}
+                          >
+                            Origin
+                          </Text>
+                        </View>
+
+                        <View style={{ flex: 2, position: "relative" }}>
+                          <Image
+                            source={{ uri: item.image }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: 12,
+                            }}
+                            resizeMode="cover"
+                          />
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Column 2: Weaving Technique Image */}
+                    <View
                       style={{
-                        position: "absolute",
-                        bottom: 6,
-                        color: "white",
-                        fontWeight: "bold",
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        borderRadius: 4,
-                        fontSize: 10,
+                        flex: 1,
+                        position: "relative",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
                     >
-                      Motifs Found
-                    </Text>
+                      <Image
+                        source={{ uri: item.weavingTechniqueImage }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 12,
+                        }}
+                        resizeMode="cover"
+                      />
+                      <Text className="absolute text-white">
+                        {item.weavingTechniqueText}
+                      </Text>
+                      <Text
+                        className="text-center"
+                        style={{
+                          position: "absolute",
+                          top: 6,
+                          color: "white",
+                          fontWeight: "bold",
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                          fontSize: 10,
+                        }}
+                      >
+                        WEAVING TECHNIQUE
+                      </Text>
+                    </View>
                   </View>
 
+                  {/* ROW 2 */}
                   <View
                     style={{
-                      position: "relative",
-                      width: (screenWidth - 48) / 2,
-                      justifyContent: "center",
-                      alignItems: "center",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginTop: 8,
                     }}
                   >
-                    <Image
-                      source={{ uri: item.symbolismImage }}
-                      style={{ width: "100%", height: 80, borderRadius: 12 }}
-                      resizeMode="cover"
-                    />
-                    <Text className="absolute text-white">
-                      {trimWords(item.symbolismText)}
-                    </Text>
-                    <Text
-                      className="text-center"
+                    <View
                       style={{
-                        position: "absolute",
-                        bottom: 6,
-                        color: "white",
-                        fontWeight: "bold",
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        borderRadius: 4,
-                        fontSize: 10,
+                        position: "relative",
+                        width: (screenWidth - 48) / 2,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
                     >
-                      SYMBOLISM & FACTS
-                    </Text>
+                      <Image
+                        source={{ uri: item.motifImage }}
+                        style={{ width: "100%", height: 80, borderRadius: 12 }}
+                        resizeMode="cover"
+                      />
+                      <Text
+                        className="text-center"
+                        style={{
+                          position: "absolute",
+                          bottom: 6,
+                          color: "white",
+                          fontWeight: "bold",
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                          fontSize: 10,
+                        }}
+                      >
+                        Motifs Found
+                      </Text>
+                    </View>
+
+                    <View
+                      style={{
+                        position: "relative",
+                        width: (screenWidth - 48) / 2,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Image
+                        source={{ uri: item.symbolismImage }}
+                        style={{ width: "100%", height: 80, borderRadius: 12 }}
+                        resizeMode="cover"
+                      />
+                      <Text className="absolute text-white">
+                        {trimWords(item.symbolismText)}
+                      </Text>
+                      <Text
+                        className="text-center"
+                        style={{
+                          position: "absolute",
+                          bottom: 6,
+                          color: "white",
+                          fontWeight: "bold",
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                          fontSize: 10,
+                        }}
+                      >
+                        SYMBOLISM & FACTS
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
-      />
+              </TouchableOpacity>
+            );
+          }}
+        />
+      )}
     </View>
   );
 }

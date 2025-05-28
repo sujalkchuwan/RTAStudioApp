@@ -3,7 +3,6 @@ import {
   Text,
   TextInput,
   FlatList,
-  Image,
   TouchableOpacity,
 } from "react-native";
 import { useEffect, useState } from "react";
@@ -25,8 +24,9 @@ type SharedFile = {
 export default function Search() {
   const [sharedFiles, setSharedFiles] = useState<SharedFile[]>([]);
   const [userProjects, setUserProjects] = useState<Room[]>([]);
-  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
   const [roomColors, setRoomColors] = useState<Record<string, string>>({});
+  const router = useRouter();
 
   const fetchFromStorage = async () => {
     try {
@@ -39,12 +39,16 @@ export default function Search() {
         setUserProjects(parsedRooms);
       }
 
+      console.log("Stored Invites Raw:", storedInvites); // Debugging: Raw invites from SecureStore
       if (storedInvites) {
         const parsedInvites = JSON.parse(storedInvites);
+        console.log("Parsed Invites:", parsedInvites); // Debugging: Parsed invites
         setSharedFiles(parsedInvites);
       } else {
         setSharedFiles([]);
+        console.log("No stored invites found."); // Debugging: No invites
       }
+      console.log("Shared Files State after set:", sharedFiles); // Debugging: sharedFiles state
 
       if (storedColors) {
         const parsedColors = JSON.parse(storedColors);
@@ -59,28 +63,48 @@ export default function Search() {
     fetchFromStorage();
   }, []);
 
+  const filteredSharedFiles = sharedFiles.filter((file) => {
+    const matches = file.room?.title
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    console.log(
+      `Filtering shared file: ${
+        file.room?.title || "Untitled"
+      } - Matches: ${matches}`
+    ); // Debugging filter
+    return matches;
+  });
+  console.log("Filtered Shared Files:", filteredSharedFiles); // Debugging: Final filtered shared files
+
+  const filteredUserProjects = userProjects.filter((room) =>
+    room.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <View className="flex-1 bg-gray-100 px-4 pt-6 gap-4 mt-10">
-      {/* Search Bar */}
-      <Text className="text-4xl font-semibold text-black">Search</Text>
+    <View className="flex-1 bg-gray-100 px-4 pt-4">
+      <Text className="text-4xl font-semibold text-black mb-4">Search</Text>
+
       <TextInput
+        value={searchQuery}
+        onChangeText={setSearchQuery}
         placeholder="Find files"
         placeholderTextColor="#9ca3af"
         className="bg-white px-4 py-3 rounded-xl text-base text-gray-800 mb-6 border border-gray-200"
       />
 
-      {/* Shared Files Section */}
       <Text className="text-lg font-semibold mb-2">Shared with You</Text>
-      {sharedFiles.length === 0 ? (
+      {filteredSharedFiles.length === 0 ? (
         <Text className="text-gray-500 mb-4">
-          No files shared with you yet.
+          No files shared with you match this search.
         </Text>
       ) : (
         <FlatList
-          data={sharedFiles}
+          data={filteredSharedFiles}
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.room?.id || item.id}
+          className="mb-6"
+          style={{ height: 160 }}
           renderItem={({ item }) => (
             <TouchableOpacity
               className="mr-4"
@@ -94,7 +118,7 @@ export default function Search() {
                 className="w-32 h-24 rounded-lg mb-1"
                 style={{
                   backgroundColor: roomColors[item.room?.id || ""] || "#e5e7eb",
-                }} // fallback gray
+                }}
               />
 
               <Text className="text-sm font-medium">
@@ -110,15 +134,15 @@ export default function Search() {
         />
       )}
 
-      {/* User Projects Section */}
-      <Text className="text-lg font-semibold mt-6 mb-2">Your Projects</Text>
-      {userProjects.length === 0 ? (
-        <Text className="text-gray-500">No projects yet.</Text>
+      <Text className="text-lg font-semibold mb-2">Your Projects</Text>
+      {filteredUserProjects.length === 0 ? (
+        <Text className="text-gray-500">No projects match this search.</Text>
       ) : (
         <FlatList
-          data={userProjects}
+          data={filteredUserProjects}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id}
+          style={{ flex: 1 }}
           renderItem={({ item }) => (
             <TouchableOpacity
               className="mb-4 flex-row items-center"

@@ -4,9 +4,8 @@
     "slug": "rta_mobile_app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/rtalogo.png",
+    "icon": "./assets/icons/appicon.png",
     "scheme": "rta_mobile_app",
-    "deepLinking": true,
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
@@ -17,21 +16,17 @@
             "scheme": "rta_mobile_app",
             "host": "auth"
           },
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
-      ]
+      ],
+      "package": "com.devkdishere.rta_mobile_app"
     },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": [
-              "rta_mobile_app"
-            ]
+            "CFBundleURLSchemes": ["rta_mobile_app"]
           }
         ]
       }
@@ -46,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/icons/appicon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -56,6 +51,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9db72c88-3b32-4a35-8682-777dc9797df0"
+      }
     }
   }
 }
