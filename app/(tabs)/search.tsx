@@ -30,25 +30,36 @@ export default function Search() {
 
   const fetchFromStorage = async () => {
     try {
-      const storedRooms = await SecureStore.getItemAsync("rooms");
-      const storedInvites = await SecureStore.getItemAsync("roomInvites");
+      const storedOwnedRooms = await SecureStore.getItemAsync("rooms"); // Get owned rooms
+      const storedInvitedRooms = await SecureStore.getItemAsync("roomInvites"); // Get invited rooms
       const storedColors = await SecureStore.getItemAsync("roomColors");
 
-      if (storedRooms) {
-        const parsedRooms = JSON.parse(storedRooms);
-        setUserProjects(parsedRooms);
+      if (storedOwnedRooms) {
+        const parsedOwnedRooms = JSON.parse(storedOwnedRooms);
+        setUserProjects(parsedOwnedRooms);
+      } else {
+        setUserProjects([]);
       }
 
-      console.log("Stored Invites Raw:", storedInvites); // Debugging: Raw invites from SecureStore
-      if (storedInvites) {
-        const parsedInvites = JSON.parse(storedInvites);
-        console.log("Parsed Invites:", parsedInvites); // Debugging: Parsed invites
-        setSharedFiles(parsedInvites);
+      console.log("Stored Invited Rooms Raw:", storedInvitedRooms); // Debugging: Raw invites from SecureStore
+      if (storedInvitedRooms) {
+        const parsedInvitedRooms = JSON.parse(storedInvitedRooms);
+        console.log("Parsed Invited Rooms:", parsedInvitedRooms); // Debugging: Parsed invites
+        // Map invited rooms to SharedFile type if necessary, assuming 'room' property
+        const mappedInvitedRooms: SharedFile[] = parsedInvitedRooms.map(
+          (room: Room) => ({
+            id: room.id,
+            room: room,
+          })
+        );
+        console.log("Mapped Shared Files:", mappedInvitedRooms); // Debugging: Mapped to SharedFile type
+        setSharedFiles(mappedInvitedRooms);
       } else {
         setSharedFiles([]);
-        console.log("No stored invites found."); // Debugging: No invites
+        console.log("No stored invited rooms found."); // Debugging: No invites
       }
-      console.log("Shared Files State after set:", sharedFiles); // Debugging: sharedFiles state
+      // Note: sharedFiles state update is asynchronous, so logging it immediately after setSharedFiles might show old value.
+      // The useEffect hook below will log the updated state.
 
       if (storedColors) {
         const parsedColors = JSON.parse(storedColors);
@@ -63,6 +74,11 @@ export default function Search() {
     fetchFromStorage();
   }, []);
 
+  // Log sharedFiles state after it's updated (due to useEffect dependency)
+  useEffect(() => {
+    console.log("Shared Files State (after render):", sharedFiles);
+  }, [sharedFiles]);
+
   const filteredSharedFiles = sharedFiles.filter((file) => {
     const matches = file.room?.title
       ?.toLowerCase()
@@ -74,7 +90,10 @@ export default function Search() {
     ); // Debugging filter
     return matches;
   });
-  console.log("Filtered Shared Files:", filteredSharedFiles); // Debugging: Final filtered shared files
+  console.log(
+    "Filtered Shared Files (after filter logic):",
+    filteredSharedFiles
+  ); // Debugging: Final filtered shared files
 
   const filteredUserProjects = userProjects.filter((room) =>
     room.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -89,84 +108,101 @@ export default function Search() {
         onChangeText={setSearchQuery}
         placeholder="Find files"
         placeholderTextColor="#9ca3af"
-        className="bg-white px-4 py-3 rounded-xl text-base text-gray-800 mb-6 border border-gray-200"
+        className="bg-white px-4 py-3 rounded-xl text-base text-gray-800 mb-4 border border-gray-200" // Adjusted mb-4
       />
 
-      <Text className="text-lg font-semibold mb-2">Shared with You</Text>
-      {filteredSharedFiles.length === 0 ? (
-        <Text className="text-gray-500 mb-4">
-          No files shared with you match this search.
-        </Text>
-      ) : (
-        <FlatList
-          data={filteredSharedFiles}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.room?.id || item.id}
-          className="mb-6"
-          style={{ height: 160 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              className="mr-4"
-              onPress={() => {
-                if (item.room?.id) {
-                  router.push(`/canvas/${item.room.id}`);
-                }
-              }}
-            >
-              <View
-                className="w-32 h-24 rounded-lg mb-1"
-                style={{
-                  backgroundColor: roomColors[item.room?.id || ""] || "#e5e7eb",
+      {/* Shared with You Section */}
+      <View className="mb-4 h-60">
+        {" "}
+        {/* Added height and mb for consistent spacing */}
+        <Text className="text-lg font-semibold mb-2">Shared with You</Text>
+        {filteredSharedFiles.length === 0 ? (
+          <Text className="text-gray-500 mb-0">
+            {" "}
+            {/* Removed mb-4 here */}
+            No files shared with you match this search.
+          </Text>
+        ) : (
+          <FlatList
+            data={filteredSharedFiles}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.room?.id || item.id}
+            style={{ flex: 1 }} // Let FlatList take remaining height of its parent View
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                className="mr-4"
+                onPress={() => {
+                  if (item.room?.id) {
+                    router.push(`/canvas/${item.room.id}`);
+                  }
                 }}
-              />
+              >
+                <View
+                  className="w-32 h-24 rounded-lg mb-1"
+                  style={{
+                    backgroundColor:
+                      roomColors[item.room?.id || ""] || "#e5e7eb",
+                  }}
+                />
 
-              <Text className="text-sm font-medium">
-                {item.room?.title || "Untitled"}
-              </Text>
-              <Text className="text-xs text-gray-500">
-                {item.room?.createdAt
-                  ? `${formatDistanceToNow(new Date(item.room.createdAt))} ago`
-                  : "Unknown"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      )}
-
-      <Text className="text-lg font-semibold mb-2">Your Projects</Text>
-      {filteredUserProjects.length === 0 ? (
-        <Text className="text-gray-500">No projects match this search.</Text>
-      ) : (
-        <FlatList
-          data={filteredUserProjects}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          style={{ flex: 1 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              className="mb-4 flex-row items-center"
-              onPress={() => {
-                router.push(`/canvas/${item.id}`);
-              }}
-            >
-              <View
-                className="w-32 h-24 rounded-lg mr-3"
-                style={{ backgroundColor: roomColors[item.id] || "#e5e7eb" }}
-              />
-
-              <View>
-                <Text className="text-base font-medium">{item.title}</Text>
-                <Text className="text-gray-500 text-sm">
-                  {item.createdAt
-                    ? `${formatDistanceToNow(new Date(item.createdAt))} ago`
+                <Text className="text-sm font-medium">
+                  {item.room?.title || "Untitled"}
+                </Text>
+                <Text className="text-xs text-gray-500">
+                  {item.room?.createdAt
+                    ? `${formatDistanceToNow(
+                        new Date(item.room.createdAt)
+                      )} ago`
                     : "Unknown"}
                 </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </View>
+
+      {/* Your Projects Section */}
+      <View style={{ flex: 1 }}>
+        {" "}
+        {/* This section takes remaining space */}
+        <Text className="text-lg font-semibold mt-4 mb-2">
+          Your Projects
+        </Text>{" "}
+        {/* Adjusted mt-4 */}
+        {filteredUserProjects.length === 0 ? (
+          <Text className="text-gray-500">No projects match this search.</Text>
+        ) : (
+          <FlatList
+            data={filteredUserProjects}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            style={{ flex: 1 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                className="mb-4 flex-row items-center"
+                onPress={() => {
+                  router.push(`/canvas/${item.id}`);
+                }}
+              >
+                <View
+                  className="w-32 h-24 rounded-lg mr-3"
+                  style={{ backgroundColor: roomColors[item.id] || "#e5e7eb" }}
+                />
+
+                <View>
+                  <Text className="text-base font-medium">{item.title}</Text>
+                  <Text className="text-gray-500 text-sm">
+                    {item.createdAt
+                      ? `${formatDistanceToNow(new Date(item.createdAt))} ago`
+                      : "Unknown"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </View>
     </View>
   );
 }

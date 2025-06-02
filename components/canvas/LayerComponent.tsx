@@ -98,7 +98,7 @@ export default function LayerComponent({
       if (!layers || typeof layers.get !== "function") return null;
       const bounds = getGroupBoundingBox(layer, layers);
       const stroke =
-        layer.groupType === "component"
+        layer.groupType === "motif"
           ? "#0b99ff"
           : layer.groupType === "textile"
           ? "#a855f7"

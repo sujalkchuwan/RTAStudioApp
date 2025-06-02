@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "rta_mobile_app",
-    "slug": "rta_mobile_app",
+    "name": "rtastudio",
+    "slug": "rtastudio",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/appicon.png",
-    "scheme": "rta_mobile_app",
+    "scheme": "rtastudio",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
@@ -13,20 +13,25 @@
         {
           "action": "VIEW",
           "data": {
-            "scheme": "rta_mobile_app",
+            "scheme": "rtastudio",
             "host": "auth"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
-      "package": "com.devkdishere.rta_mobile_app"
+      "package": "com.devkdishere.rtastudio"
     },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["rta_mobile_app"]
+            "CFBundleURLSchemes": [
+              "rtastudio"
+            ]
           }
         ]
       }
@@ -57,8 +62,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "9db72c88-3b32-4a35-8682-777dc9797df0"
+        "projectId": "5b876950-83fa-4983-8b40-77e9d4f210bc"
       }
-    }
+    },
+    "owner": "devkdishere"
   }
 }

@@ -31,15 +31,27 @@ const Recents = () => {
   useEffect(() => {
     const loadRooms = async () => {
       try {
-        const storedRooms = await SecureStore.getItemAsync("rooms");
-        const parsedRooms = storedRooms ? JSON.parse(storedRooms) : [];
+        const storedOwnedRooms = await SecureStore.getItemAsync("rooms"); // Owned rooms
+        const storedInvitedRooms = await SecureStore.getItemAsync(
+          "roomInvites"
+        ); // Invited rooms
+
+        const parsedOwnedRooms = storedOwnedRooms
+          ? JSON.parse(storedOwnedRooms)
+          : [];
+        const parsedInvitedRooms = storedInvitedRooms
+          ? JSON.parse(storedInvitedRooms)
+          : [];
+
+        // Combine both owned and invited rooms
+        const allRooms = [...parsedOwnedRooms, ...parsedInvitedRooms];
 
         const storedColors = await SecureStore.getItemAsync("roomColors");
         const roomColors = storedColors ? JSON.parse(storedColors) : {};
 
         let updated = false;
 
-        const augmentedRooms = parsedRooms.map(
+        const augmentedRooms = allRooms.map(
           (room: { id: string; title: string }) => {
             if (!roomColors[room.id]) {
               roomColors[room.id] = generateLightColor();
@@ -48,10 +60,11 @@ const Recents = () => {
 
             return {
               id: room.id,
+              title: room.title, // Add the required title property
               name: room.title || "Untitled",
-              designer: "John Doe",
-              image: roomColors[room.id], // use color as image for now
-              lastViewedAt: new Date().toISOString(),
+              designer: "John Doe", // You might want to get actual designer from backend
+              image: roomColors[room.id],
+              lastViewedAt: new Date().toISOString(), // This will be current time, not actual last viewed
             };
           }
         );
@@ -94,9 +107,9 @@ const Recents = () => {
 
   return (
     <Provider>
-      <View className="flex-1 bg-gray-100 p-4 mt-10">
+      <View className="flex-1 bg-gray-100 p-4 pt-4 mt-10">
         {/* Header */}
-        <View className="flex-row justify-between items-center mb-8 mt-5">
+        <View className="flex-row justify-between items-center mb-4 mt-5">
           <Text className="text-4xl font-semibold text-black">Recents</Text>
           <Menu
             visible={menuVisible}
@@ -112,14 +125,14 @@ const Recents = () => {
                 setSortBy("alphabet");
                 closeMenu();
               }}
-              title="Sort by Alphabet"
+              title={<Text>Sort by Alphabet</Text>}
             />
             <Menu.Item
               onPress={() => {
                 setSortBy("recent");
                 closeMenu();
               }}
-              title="Sort by Recently Viewed"
+              title={<Text>Sort by Recently Viewed</Text>}
             />
           </Menu>
         </View>
@@ -161,6 +174,12 @@ const Recents = () => {
             </TouchableOpacity>
           )}
           contentContainerStyle={{ paddingBottom: 50 }}
+          style={{ flex: 1 }}
+          ListEmptyComponent={() => (
+            <View className="flex-1 justify-center items-center mt-10">
+              <Text className="text-gray-500 text-lg">No rooms found.</Text>
+            </View>
+          )}
         />
       </View>
     </Provider>

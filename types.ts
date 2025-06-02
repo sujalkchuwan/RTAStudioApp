@@ -17,64 +17,112 @@ export enum LayerType {
   Text,
   Image,
   Group,
+  Triangle,
 }
 
-// Shared base layer properties
-export type BaseLayer = {
-  id: string;
+export type TriangleLayer = {
+  type: LayerType.Triangle;
   name: string;
   x: number;
   y: number;
   height: number;
   width: number;
+  fill: Color;
+  stroke: Color;
+  opacity: number;
+  cornerRadius?: number;
+  parentId?: string;
+  strokeWidth?: number;
+  rotation?: number;
+};
+
+export type ImageLayer = {
+  type: LayerType.Image;
+  name: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  src: string;
   opacity: number;
   parentId?: string;
 };
 
-export type ImageLayer = BaseLayer & {
-  type: LayerType.Image;
-  src: string;
-};
-
-export type RectangleLayer = BaseLayer & {
+export type RectangleLayer = {
   type: LayerType.Rectangle;
+  name: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
   fill: Color;
   stroke: Color;
+  opacity: number;
   cornerRadius?: number;
+  parentId?: string;
   strokeWidth?: number;
   rotation?: number;
 };
 
-export type EllipseLayer = BaseLayer & {
+export type EllipseLayer = {
   type: LayerType.Ellipse;
+  name: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
   fill: Color;
   stroke: Color;
+  opacity: number;
+  parentId?: string;
   strokeWidth?: number;
 };
 
-export type PathLayer = BaseLayer & {
+export type PathLayer = {
   type: LayerType.Path;
+  x: number;
+  name: string;
+  y: number;
+  height: number;
+  width: number;
   fill: Color;
   stroke: Color;
+  opacity: number;
   points: number[][];
+  parentId?: string;
   strokewidth?: number;
 };
 
-export type GroupLayer = BaseLayer & {
+export type GroupLayer = {
   type: LayerType.Group;
-  groupType: "component" | "textile" | "group";
+  name: string;
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  opacity: number;
+  groupType: "motif" | "textile" | "group";
   children: string[]; // IDs of child layers
+  parentId?: string;
   rotation?: number;
 };
 
-export type TextLayer = BaseLayer & {
+export type TextLayer = {
   type: LayerType.Text;
+  name: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
   text: string;
   fontSize: number;
   fontWeight: number;
   fontFamily: string;
   fill: Color;
   stroke: Color;
+  opacity: number;
+  parentId?: string;
 };
 
 export type Layer =
@@ -83,7 +131,8 @@ export type Layer =
   | PathLayer
   | TextLayer
   | ImageLayer
-  | GroupLayer;
+  | GroupLayer
+  | TriangleLayer;
 
 export type Point = {
   x: number;

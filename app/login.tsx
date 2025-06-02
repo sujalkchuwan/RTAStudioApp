@@ -43,11 +43,34 @@ export default function LoginScreen() {
 
       await SecureStore.setItemAsync("authToken", data.token);
       await SecureStore.setItemAsync("usedData", JSON.stringify(data.user));
-      await SecureStore.setItemAsync("rooms", JSON.stringify(data.rooms));
-      await SecureStore.setItemAsync(
-        "roomInvites",
-        JSON.stringify(data.roomInvites || [])
-      );
+
+      // --- START: Changes for new rooms structure ---
+      if (
+        data.rooms &&
+        typeof data.rooms === "object" &&
+        data.rooms.owned &&
+        data.rooms.invited
+      ) {
+        await SecureStore.setItemAsync(
+          "rooms",
+          JSON.stringify(data.rooms.owned)
+        ); // Store owned rooms
+        await SecureStore.setItemAsync(
+          "roomInvites",
+          JSON.stringify(data.rooms.invited)
+        ); // Store invited rooms
+      } else {
+        // Fallback for older structure or if rooms structure is unexpected
+        await SecureStore.setItemAsync(
+          "rooms",
+          JSON.stringify(data.rooms || [])
+        );
+        await SecureStore.setItemAsync(
+          "roomInvites",
+          JSON.stringify(data.roomInvites || [])
+        );
+      }
+      // --- END: Changes for new rooms structure ---
 
       alert("Login successful!");
       router.replace("/(tabs)");
