@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import Svg, { G } from "react-native-svg";
 import {
-  GestureHandlerRootView,
   PinchGestureHandler,
   PinchGestureHandlerGestureEvent,
   PinchGestureHandlerStateChangeEvent,
@@ -21,12 +20,17 @@ import LayerComponent from "./LayerComponent"; // Assuming LayerComponent is alr
 import RightSidebar from "../sidebar/RightSidebar";
 import { FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { V } from "@liveblocks/react/dist/room-CqT08uWZ.cjs";
 
 // Define SIDEBAR_WIDTH using Dimensions for responsive design
 const SIDEBAR_WIDTH = Dimensions.get("window").width * 0.6;
 
-// Create an Animated G component for SVG transformations
+// Base SVG canvas dimensions (used for viewBox calculations)
+const SVG_BASE_WIDTH = 1000;
+const SVG_BASE_HEIGHT = 1000;
+
+// Animated G is no longer strictly necessary for pan/zoom via viewBox,
+// but can remain if individual layer transforms are intended later.
+// For now, it will just wrap the layers without applying its own transforms.
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 export function CanvasView() {
@@ -41,10 +45,17 @@ export function CanvasView() {
     me.presence?.selection?.length > 0 ? me.presence.selection[0] : null
   );
 
-  // Animated values for camera transformations
+  // Animated values for camera transformations:
+  // translateX, translateY will now represent the top-left corner of the SVG viewBox.
+  // scale will represent the zoom level.
   const translateX = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(1)).current;
+
+  // State for the SVG viewBox string, updated by Animated.Value listeners
+  const [viewBoxString, setViewBoxString] = useState(
+    `0 0 ${SVG_BASE_WIDTH} ${SVG_BASE_HEIGHT}`
+  );
 
   // Refs to store the *current numerical values* of Animated.Values
   // These are updated via listeners to avoid direct access to internal properties
@@ -54,11 +65,15 @@ export function CanvasView() {
 
   // State to control the visibility of the right sidebar
   const [showRightSidebar, setShowRightSidebar] = useState(false);
+  // State to ensure initial camera positioning runs only once
+  const [hasInitializedCamera, setHasInitializedCamera] = useState(false);
+  // State to track if a camera animation (e.g., centering on layer) is in progress)
+  // This state will now always be false as camera animations are removed.
+  const [isAnimatingCamera, setIsAnimatingCamera] = useState(false);
 
-  // Refs for managing pan and zoom gestures
-  const lastPanX = useRef(0);
-  const lastPanY = useRef(0);
-  const baseScale = useRef(1);
+  // Ref to store the initial viewBox origin when a pan gesture starts
+  const panStartViewBoxX = useRef(0);
+  const panStartViewBoxY = useRef(0);
 
   // Animated value for the sidebar's horizontal translation
   const sidebarTranslateX = useRef(new Animated.Value(SIDEBAR_WIDTH)).current;
@@ -72,17 +87,34 @@ export function CanvasView() {
     }).start();
   }, [showRightSidebar, sidebarTranslateX]);
 
-  // Add listeners to Animated.Values to keep refs updated
+  // Add listeners to Animated.Values to keep refs updated and update viewBoxString
   useEffect(() => {
+    const updateViewBox = () => {
+      // Use the ref values directly, as they are updated by listeners
+      const currentX = currentTranslateX.current;
+      const currentY = currentTranslateY.current;
+      const currentZ = currentScale.current;
+      const newWidth = SVG_BASE_WIDTH / currentZ;
+      const newHeight = SVG_BASE_HEIGHT / currentZ;
+      setViewBoxString(`${currentX} ${currentY} ${newWidth} ${newHeight}`);
+    };
+
+    // Listeners to update the current ref values
     const txListener = translateX.addListener(({ value }) => {
       currentTranslateX.current = value;
+      updateViewBox(); // Update viewBox string whenever translateX changes
     });
     const tyListener = translateY.addListener(({ value }) => {
       currentTranslateY.current = value;
+      updateViewBox(); // Update viewBox string whenever translateY changes
     });
     const scaleListener = scale.addListener(({ value }) => {
       currentScale.current = value;
+      updateViewBox(); // Update viewBox string whenever scale changes
     });
+
+    // Initial update of viewBoxString when component mounts
+    updateViewBox();
 
     // Clean up listeners on component unmount
     return () => {
@@ -90,54 +122,85 @@ export function CanvasView() {
       translateY.removeListener(tyListener);
       scale.removeListener(scaleListener);
     };
-  }, [translateX, translateY, scale]); // Dependencies ensure listeners are re-attached if Animated.Values change (though they are refs, so typically won't)
+  }, [translateX, translateY, scale]);
 
   // Initialize camera position to center around existing layers when component mounts
   useEffect(() => {
-    if (layerIds && layers && layerIds.length > 0) {
+    if (!hasInitializedCamera && layerIds && layers && layerIds.length > 0) {
       const positions = layerIds
-        .map((id) => layers.get(id)) // Get layer data for each ID
+        .map((id) => layers.get(id))
         .filter(
           (l): l is NonNullable<typeof l> =>
             !!l && typeof l.x === "number" && typeof l.y === "number"
-        ); // Filter for valid layers with x, y coordinates
+        );
 
       if (positions.length > 0) {
         const minX = Math.min(...positions.map((l) => l.x));
         const minY = Math.min(...positions.map((l) => l.y));
-        // Set initial animated values.
-        // We're translating the content, so the initial position should be negative
-        // of the desired offset to bring the content into view.
-        translateX.setValue(-(minX - 100)); // Adjust to center
-        translateY.setValue(-(minY - 100)); // Adjust to center
+        // Set initial animated values for the viewBox origin
+        translateX.setValue(minX - 100);
+        translateY.setValue(minY - 100);
         scale.setValue(1);
+        setHasInitializedCamera(true);
       }
     }
-  }, [layerIds, layers]);
+  }, [layerIds, layers, hasInitializedCamera]);
 
-  // PanResponder for canvas dragging/panning
+  // Handler for clicking on the canvas (background) - now internal to PanResponder
+  const handleCanvasClick = useCallback(() => {
+    const isLayerSelected =
+      self?.presence?.selection && self.presence.selection.length > 0;
+
+    if (isLayerSelected) {
+      // If a layer is selected, deselect it and close the sidebar.
+      room.updatePresence({ selection: [] });
+      setShowRightSidebar(false);
+    } else {
+      // If no layer is selected, and the sidebar is currently hidden,
+      // then tapping the canvas should open the sidebar to show canvas properties.
+      // This prevents re-opening if it's already open or in transition.
+      if (!showRightSidebar) {
+        // Only open if it's currently hidden
+        setShowRightSidebar(true);
+      }
+      // Ensure no layer is selected in presence (redundant but safe)
+      room.updatePresence({ selection: [] });
+    }
+  }, [self?.presence?.selection, room, setShowRightSidebar, showRightSidebar]); // Added showRightSidebar to dependencies
+
+  // PanResponder for canvas dragging/panning and tap detection
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => !isAnimatingCamera, // Only claim if NOT animating (always false now)
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Only allow pan if not interacting with a layer (e.g., if a layer is selected,
-        // you might want to prevent canvas pan to allow layer dragging).
-        // For now, we allow pan always.
+        if (isAnimatingCamera) return false; // Do not move if animating (always false now)
         return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
       },
       onPanResponderGrant: () => {
-        // Store the current animated values as the base for the gesture
-        // Access values from the updated refs
-        lastPanX.current = currentTranslateX.current;
-        lastPanY.current = currentTranslateY.current;
+        // Store the current viewBox origin as the starting point for this pan gesture
+        panStartViewBoxX.current = currentTranslateX.current;
+        panStartViewBoxY.current = currentTranslateY.current;
       },
       onPanResponderMove: (_, gestureState) => {
-        // Update animated values directly
-        translateX.setValue(lastPanX.current + gestureState.dx);
-        translateY.setValue(lastPanY.current + gestureState.dy);
+        // Calculate new viewBox origin based on initial stored position and gesture delta, scaled by current zoom
+        // Moving right on screen means decreasing viewBox X
+        translateX.setValue(
+          panStartViewBoxX.current - gestureState.dx / currentScale.current
+        );
+        translateY.setValue(
+          panStartViewBoxY.current - gestureState.dy / currentScale.current
+        );
       },
-      onPanResponderRelease: () => {},
-      onPanResponderTerminate: () => {},
+      onPanResponderRelease: (evt, gestureState) => {
+        const isTap =
+          Math.abs(gestureState.dx) < 5 && Math.abs(gestureState.dy) < 5;
+        if (isTap) {
+          handleCanvasClick();
+        }
+      },
+      onPanResponderTerminate: (evt, gestureState) => {
+        // No specific action needed here for viewBox, as it's continuously updated
+      },
     })
   ).current;
 
@@ -150,9 +213,7 @@ export function CanvasView() {
   const onPinchStateChange = useCallback(
     (event: PinchGestureHandlerStateChangeEvent) => {
       if (event.nativeEvent.oldState === State.ACTIVE) {
-        // When pinch gesture ends, update baseScale for subsequent gestures
-        // Access value from the updated ref
-        baseScale.current = currentScale.current;
+        // `currentScale.current` is already updated by listener
       }
     },
     []
@@ -160,26 +221,11 @@ export function CanvasView() {
 
   // Handler for when a layer is pressed
   const handleLayerPress = (id: string) => {
-    room.updatePresence({ selection: [id] }); // Select the layer
-    setShowRightSidebar(true); // Show the sidebar
+    room.updatePresence({ selection: [id] });
+    setShowRightSidebar(true);
+
+    // Camera position remains unchanged as per user request.
   };
-
-  // Handler for clicking on the canvas (background)
-  const handleCanvasClick = useCallback(() => {
-    const isLayerSelected =
-      self?.presence?.selection && self.presence.selection.length > 0;
-
-    if (isLayerSelected) {
-      // If a layer is selected, unselect it and close the sidebar
-      room.updatePresence({ selection: [] });
-      setShowRightSidebar(false);
-    } else {
-      // If no layer is selected, open the sidebar to show canvas properties
-      setShowRightSidebar(true);
-      // Ensure no layer is selected in presence (already true if isLayerSelected is false)
-      room.updatePresence({ selection: [] });
-    }
-  }, [self?.presence?.selection, room, setShowRightSidebar]);
 
   // All layers are visible, no filtering based on component type
   const visibleLayerIds = layerIds;
@@ -215,21 +261,17 @@ export function CanvasView() {
             <Svg
               width="100%"
               height="100%"
-              // Static viewBox, transformations handled by AnimatedG
-              viewBox={`0 0 1000 1000`}
-              // Dynamically set background color from roomColor, fallback to white
+              viewBox={viewBoxString} // Use the dynamic viewBox string
               style={{
                 backgroundColor: roomColor ? colorToCss(roomColor) : "#fff",
               }}
-              onPress={handleCanvasClick} // Handle canvas clicks
             >
-              {/* AnimatedG applies transformations to all child layers */}
-              <AnimatedG
-                // Pass animated values directly as SVG transform props
-                translateX={translateX}
-                translateY={translateY}
-                scale={scale}
-              >
+              {/* AnimatedG is no longer strictly necessary for pan/zoom,
+                  but can remain if individual layer transforms are intended later.
+                  It no longer applies the main pan/zoom transforms. */}
+              <G>
+                {" "}
+                {/* Changed AnimatedG back to G as it's not applying transforms */}
                 {/* Render each layer component */}
                 {visibleLayerIds?.map((id) => (
                   <LayerComponent
@@ -238,7 +280,7 @@ export function CanvasView() {
                     onLayerPointerDown={() => handleLayerPress(id)}
                   />
                 ))}
-              </AnimatedG>
+              </G>
             </Svg>
           </View>
         </PinchGestureHandler>
@@ -250,7 +292,7 @@ export function CanvasView() {
           { transform: [{ translateX: sidebarTranslateX }] },
           {
             height: "100%",
-            width: SIDEBAR_WIDTH, // Use dynamic width here
+            width: SIDEBAR_WIDTH,
             position: "absolute",
             top: 0,
             bottom: 0,
@@ -258,14 +300,13 @@ export function CanvasView() {
             zIndex: 10,
           },
         ]}
-        className="bg-gray-50 shadow-lg" // NativeWind classes for background and shadow
+        className="bg-gray-50 shadow-lg"
       >
         <RightSidebar
-          // Pass the selected layer ID (or empty string for canvas properties)
           selectedLayerId={selectedLayer ?? ""}
           onClose={() => {
-            setShowRightSidebar(false); // Close the sidebar
-            room.updatePresence({ selection: [] }); // Clear any selection
+            setShowRightSidebar(false); // This should correctly hide the sidebar
+            room.updatePresence({ selection: [] }); // This clears selection
           }}
         />
       </Animated.View>
