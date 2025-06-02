@@ -8,12 +8,15 @@ import { LayerType } from "@/types";
 import { hexToRgb, colorToCss } from "@/utils/utils";
 import { FontAwesome } from "@expo/vector-icons";
 import Tabs from "./Tabs";
+import { useRef, useCallback, useEffect } from "react"; // Import useRef, useCallback, useEffect
 
 // Accepts selectedLayerId and onClose as props
 type RightSidebarProps = {
   selectedLayerId: string;
   onClose: () => void;
 };
+
+const DEBOUNCE_DELAY_ROOM_COLOR = 100; // Debounce delay for room color updates in milliseconds
 
 export default function RightSidebar({
   selectedLayerId,
@@ -24,6 +27,19 @@ export default function RightSidebar({
   const roomColor = useStorage((root) => root.roomColor);
   const selectedLayer = selectedLayerId ? layers?.get(selectedLayerId) : null;
 
+  // Ref for managing the debounce timeout for room color updates
+  const roomColorDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up any pending debounce timeout when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (roomColorDebounceTimeout.current) {
+        clearTimeout(roomColorDebounceTimeout.current);
+      }
+    };
+  }, []);
+
+  // Liveblocks mutation to update a layer's properties
   const updateLayer = useMutation(
     (
       { storage },
@@ -64,6 +80,7 @@ export default function RightSidebar({
           ...(updates.strokeWidth !== undefined && {
             strokeWidth: updates.strokeWidth,
           }),
+          // Convert hex color to RGB before storing
           ...(updates.fill !== undefined && { fill: hexToRgb(updates.fill) }),
           ...(updates.stroke !== undefined && {
             stroke: hexToRgb(updates.stroke),
@@ -82,9 +99,25 @@ export default function RightSidebar({
     [selectedLayerId]
   );
 
-  const updateRoomColor = useMutation(({ storage }, color: string) => {
+  // Original Liveblocks mutation to update the room's background color
+  const _updateRoomColor = useMutation(({ storage }, color: string) => {
     storage.set("roomColor", hexToRgb(color));
   }, []);
+
+  // Debounced version of the room color update mutation
+  const debouncedUpdateRoomColor = useCallback(
+    (color: string) => {
+      // Clear any existing timeout to prevent previous updates from firing
+      if (roomColorDebounceTimeout.current) {
+        clearTimeout(roomColorDebounceTimeout.current);
+      }
+      // Set a new timeout to call the actual mutation after the debounce delay
+      roomColorDebounceTimeout.current = setTimeout(() => {
+        _updateRoomColor(color);
+      }, DEBOUNCE_DELAY_ROOM_COLOR);
+    },
+    [_updateRoomColor]
+  ); // Dependency on _updateRoomColor ensures the latest mutation is used
 
   // Dynamically build the array of Tab.Panel components for layer colors
   const layerColorTabs = [];
@@ -97,6 +130,7 @@ export default function RightSidebar({
           label="Fill Color"
           value={colorToCss(selectedLayer.fill)}
           onChange={(val) => {
+            // Layer fill color updates immediately without debouncing
             console.log("MobileColorPicker onChange (fill):", val);
             updateLayer({ fill: val });
           }}
@@ -113,6 +147,7 @@ export default function RightSidebar({
           label="Stroke Color"
           value={colorToCss(selectedLayer.stroke)}
           onChange={(val) => {
+            // Layer stroke color updates immediately without debouncing
             console.log("MobileColorPicker onChange (stroke):", val);
             updateLayer({ stroke: val });
           }}
@@ -252,7 +287,7 @@ export default function RightSidebar({
               )}
             </>
           ) : (
-            // This block is shown when no layer is selected
+            // This block is shown when no layer is selected (Canvas Properties)
             <>
               <Text className="text-base font-semibold mt-4 mb-2 text-gray-700">
                 Canvas Properties
@@ -260,9 +295,9 @@ export default function RightSidebar({
               <MobileColorPicker
                 label="Canvas Background"
                 value={colorToCss(roomColor ?? { r: 255, g: 255, b: 255 })}
-                onChange={updateRoomColor}
+                onChange={debouncedUpdateRoomColor} // Use the debounced function here
               />
-              <Text className="mt-4">No layer selected</Text>
+              <Text className="mt-4 text-gray-600">No layer selected</Text>
             </>
           )}
         </View>
