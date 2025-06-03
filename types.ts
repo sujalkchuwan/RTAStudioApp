@@ -17,11 +17,12 @@ export enum LayerType {
   Text,
   Image,
   Group,
-  Triangle,
+  Polygon,
+  Vector,
 }
 
-export type TriangleLayer = {
-  type: LayerType.Triangle;
+export type PolygonLayer = {
+  type: LayerType.Polygon;
   name: string;
   x: number;
   y: number;
@@ -29,11 +30,35 @@ export type TriangleLayer = {
   width: number;
   fill: Color;
   stroke: Color;
+  sides?: number;
   opacity: number;
   cornerRadius?: number;
   parentId?: string;
   strokeWidth?: number;
   rotation?: number;
+};
+
+export type VectorLayer = {
+  type: LayerType.Vector;
+  name: string;
+  x: number;
+  y: number;
+  points: {
+    x: number;
+    y: number;
+    curve?: "straight" | "quadratic" | "cubic";
+    handleLeft?: { x: number; y: number };
+    handleRight?: { x: number; y: number };
+  }[];
+  stroke: Color;
+  strokeWidth?: number;
+  opacity: number;
+  rotation?: number;
+  parentId?: string;
+  fill: Color;
+  closed?: boolean;
+  height: number;
+  width: number;
 };
 
 export type ImageLayer = {
@@ -76,6 +101,7 @@ export type EllipseLayer = {
   opacity: number;
   parentId?: string;
   strokeWidth?: number;
+  rotation?: number;
 };
 
 export type PathLayer = {
@@ -132,8 +158,8 @@ export type Layer =
   | TextLayer
   | ImageLayer
   | GroupLayer
-  | TriangleLayer;
-
+  | PolygonLayer
+  | VectorLayer;
 export type Point = {
   x: number;
   y: number;
@@ -176,7 +202,8 @@ export type CanvasState =
         | LayerType.Rectangle
         | LayerType.Ellipse
         | LayerType.Text
-        | LayerType.Image;
+        | LayerType.Image
+        | LayerType.Polygon;
       imageSrc?: string;
     }
   | {
@@ -194,6 +221,12 @@ export type CanvasState =
   | {
       mode: CanvasMode.Pressing;
       origin: Point;
+    }
+  | {
+      mode: CanvasMode.Pen;
+      points: Point[];
+      color: Color;
+      strokeWidth: number;
     };
 
 export enum CanvasMode {
@@ -201,6 +234,7 @@ export enum CanvasMode {
   Dragging,
   Inserting,
   Pencil,
+  Pen,
   Resizing,
   Translating,
   SelectionNet,

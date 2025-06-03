@@ -1,148 +1,168 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, Pressable, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { ArrowLeft, Send, Image as ImageIcon, Paperclip } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as SecureStore from 'expo-secure-store';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function Feedback() {
+export default function FeedbackForm() {
+  const { email: routeEmail, id: routeId } = useLocalSearchParams();
+  const router = useRouter();
+
   const [email, setEmail] = useState('');
+  const [userId, setUserId] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showThankYouModal, setShowThankYouModal] = useState(false);
+  const [image, setImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSend = () => {
-    setShowConfirmModal(true);
+  useEffect(() => {
+    if (routeEmail && typeof routeEmail === 'string') setEmail(routeEmail);
+    if (routeId && typeof routeId === 'string') setUserId(routeId);
+    else {
+      (async () => {
+        const storedUser = await SecureStore.getItemAsync('usedData');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          if (parsed?.email) setEmail(parsed.email);
+          if (parsed?.id) setUserId(parsed.id);
+        }
+      })();
+    }
+  }, [routeEmail, routeId]);
+
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      const pickedImage = result.assets[0];
+      setImage({
+        uri: pickedImage.uri,
+        name: pickedImage.fileName || pickedImage.uri.split('/').pop(),
+        type: pickedImage.type || 'image/jpeg',
+      });
+    }
   };
 
-  const handleConfirmSend = () => {
-    setShowConfirmModal(false);
-    setShowThankYouModal(true);
-  };
+  const handleSubmit = async () => {
+    if (!email.trim() || !subject.trim() || !description.trim() || !image) {
+      Alert.alert('Error', 'All fields are required, including an image.');
+      return;
+    }
 
-  const handleDone = () => {
-    setShowThankYouModal(false);
-    router.back();
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('id', userId);
+      formData.append('subject', subject);
+      formData.append('description', description);
+      formData.append('image', {
+        uri: image.uri,
+        name: image.name,
+        type: image.type,
+      });
+
+      const response = await fetch('https://rta-server.onrender.com/api/feedback/userFeedback', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Feedback submitted successfully', [
+          { text: 'OK', onPress: () => router.replace('/profile') },
+        ]);
+        setSubject('');
+        setDescription('');
+        setImage(null);
+      } else {
+        const errorText = await response.text();
+        console.log('Server error response:', errorText);
+        throw new Error(errorText || 'Submission failed');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 ">
-      <View className="flex-row justify-between items-center p-4 bg-white">
+    <ScrollView className="flex-1 bg-white px-6 pt-12 mt-10">
+      {/* Header */}
+      <View className="flex-row justify-between items-center mb-8">
         <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color="white" />
+          <Ionicons name="close" size={28} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleSend}>
-          <Send size={24} color="#FF4B4B" />
+        <Text className="text-2xl font-semibold">Feedback</Text>
+        <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? (
+            <ActivityIndicator color="red" />
+          ) : (
+            <Ionicons name="send" size={28} color="red" />
+          )}
         </TouchableOpacity>
       </View>
 
-      <View className="flex-1 p-4">
-        <View className="mb-6">
-          <Text className="text-sm text-gray-500 mb-2">Email</Text>
-          <TextInput
-            className="bg-white p-3 rounded-lg text-base"
-            placeholder="ryoutamikasa@gmail.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-        </View>
+      {/* Form Fields */}
+      <View className="mb-6">
+        <Text className="text-base font-medium text-gray-800 mb-2">Email</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="your@email.com"
+          className="border border-gray-300 p-4 rounded-md mb-4"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
 
-        <View className="mb-6">
-          <Text className="text-sm text-gray-500 mb-2">Subject</Text>
-          <TextInput
-            className="bg-white p-3 rounded-lg text-base"
-            placeholder="please give us the primary subject of the issue"
-            value={subject}
-            onChangeText={setSubject}
-          />
-        </View>
+        <Text className="text-base font-medium text-gray-800 mb-2">Subject</Text>
+        <TextInput
+          value={subject}
+          onChangeText={setSubject}
+          placeholder="Give the primary subject of the issue"
+          className="border border-gray-300 p-4 rounded-md mb-4"
+        />
 
-        <View className="mb-6 flex-1">
-          <Text className="text-sm text-gray-500 mb-2">Description</Text>
-          <TextInput
-            className="bg-white p-3 rounded-lg text-base flex-1"
-            placeholder="Please be as detailed as possible. What did you expect and what happened instead?"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
+        <Text className="text-base font-medium text-gray-800 mb-2">Description</Text>
+        <TextInput
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Be as detailed as possible. What did you expect and what happened instead?"
+          multiline
+          numberOfLines={6}
+          className="border border-gray-300 p-4 rounded-md text-base mb-4"
+          textAlignVertical="top"
+        />
 
-        <View className="flex-row space-x-4">
-          <TouchableOpacity className="flex-row items-center space-x-2 p-4 bg-white rounded-lg flex-1">
-            <ImageIcon size={24} color="#666" />
-            <Text className="text-gray-600">Select image</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity className="flex-row items-center space-x-2 p-4 bg-white rounded-lg flex-1">
-            <Paperclip size={24} color="#666" />
-            <Text className="text-gray-600">Select file</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Confirm Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showConfirmModal}
-        onRequestClose={() => setShowConfirmModal(false)}
-      >
-        <Pressable 
-          className="flex-1 bg-black/50 justify-center items-center"
-          onPress={() => setShowConfirmModal(false)}
+        <TouchableOpacity
+          onPress={handlePickImage}
+          className="flex-row items-center justify-center gap-2 p-4 border border-dashed border-red-400 rounded-md mb-4"
         >
-          <Pressable className="bg-white p-6 rounded-2xl mx-4 w-[90%] max-w-sm">
-            <Text className="text-xl font-bold text-center mb-4">Send Feedback?</Text>
-            <Text className="text-gray-600 text-center mb-6">
-              Are you sure you want to send this feedback?
-            </Text>
-            <View className="flex-row space-x-3">
-              <TouchableOpacity 
-                className="flex-1 bg-gray-100 p-4 rounded-lg"
-                onPress={() => setShowConfirmModal(false)}
-              >
-                <Text className="text-center font-semibold">Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                className="flex-1 bg-red-500 p-4 rounded-lg"
-                onPress={handleConfirmSend}
-              >
-                <Text className="text-white text-center font-semibold">Send</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          <Ionicons name="image-outline" size={24} color="red" />
+          <Text className="text-sm text-gray-800">Select image</Text>
+        </TouchableOpacity>
 
-      {/* Thank You Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showThankYouModal}
-        onRequestClose={() => setShowThankYouModal(false)}
-      >
-        <View className="flex-1 bg-black/50 justify-center items-center">
-          <View className="bg-white p-6 rounded-2xl mx-4 w-[90%] max-w-sm items-center">
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1687692414405-210c5098c958?w=400&auto=format&fit=crop&q=60' }}
-              className="w-32 h-32 rounded-full mb-4"
-            />
-            <Text className="text-xl font-bold text-center mb-2">Thank You!</Text>
-            <Text className="text-gray-600 text-center mb-6">
-              Your feedback has been submitted successfully.
-            </Text>
-            <TouchableOpacity 
-              className="bg-red-500 px-8 py-4 rounded-lg w-full"
-              onPress={handleDone}
-            >
-              <Text className="text-white text-center font-semibold">Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+        {image && (
+          <Image
+            source={{ uri: image.uri }}
+            style={{ width: '100%', height: 240, borderRadius: 8 }}
+            className="mb-4"
+          />
+        )}
+      </View>
+    </ScrollView>
   );
 }

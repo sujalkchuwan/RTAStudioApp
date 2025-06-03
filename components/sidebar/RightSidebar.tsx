@@ -58,6 +58,7 @@ export default function RightSidebar({
         fontFamily?: string;
         strokeWidth?: number;
         rotation?: number;
+        sides?: number; // Added sides for Polygon layer
       }
     ) => {
       const targetId = updates.id ?? selectedLayerId;
@@ -77,6 +78,7 @@ export default function RightSidebar({
           ...(updates.cornerRadius !== undefined && {
             cornerRadius: updates.cornerRadius,
           }),
+          ...(updates.sides !== undefined && { sides: updates.sides }), // Update sides property
           ...(updates.strokeWidth !== undefined && {
             strokeWidth: updates.strokeWidth,
           }),
@@ -112,9 +114,10 @@ export default function RightSidebar({
         clearTimeout(roomColorDebounceTimeout.current);
       }
       // Set a new timeout to call the actual mutation after the debounce delay
+      // Explicitly cast the return type of setTimeout to NodeJS.Timeout
       roomColorDebounceTimeout.current = setTimeout(() => {
         _updateRoomColor(color);
-      }, DEBOUNCE_DELAY_ROOM_COLOR);
+      }, DEBOUNCE_DELAY_ROOM_COLOR) as unknown as NodeJS.Timeout;
     },
     [_updateRoomColor]
   ); // Dependency on _updateRoomColor ensures the latest mutation is used
@@ -217,21 +220,44 @@ export default function RightSidebar({
                 </View>
               )}
 
-              {/* Rotation */}
+              {/* Rotation (for Rectangle, Text, Polygon, and Ellipse) */}
               {(selectedLayer.type === LayerType.Rectangle ||
-                selectedLayer.type === LayerType.Text) &&
-                "rotation" in selectedLayer && (
-                  <>
-                    <Text className="text-base font-semibold mt-4 mb-2 text-gray-700">
-                      Rotation
-                    </Text>
-                    <NumberInput
-                      label="Rotation"
-                      value={selectedLayer.rotation ?? 0}
-                      onChange={(val) => updateLayer({ rotation: val })}
-                    />
-                  </>
-                )}
+                selectedLayer.type === LayerType.Text ||
+                selectedLayer.type === LayerType.Polygon ||
+                selectedLayer.type === LayerType.Ellipse) && ( // Added LayerType.Ellipse here
+                <>
+                  <Text className="text-base font-semibold mt-4 mb-2 text-gray-700">
+                    Rotation
+                  </Text>
+                  <NumberInput
+                    label="Rotation"
+                    // Type assertion to 'any' is used here to allow access to 'rotation'
+                    // property on selectedLayer without strict type checking,
+                    // as 'rotation' might be optional on the union type 'Layer'.
+                    // The ideal solution is to ensure 'rotation' is explicitly defined
+                    // as an optional property on all relevant layer types in your 'types.ts'.
+                    value={(selectedLayer as any).rotation ?? 0}
+                    onChange={(val) => updateLayer({ rotation: val })}
+                  />
+                </>
+              )}
+
+              {/* Sides (only for Polygon) */}
+              {selectedLayer.type === LayerType.Polygon && (
+                <>
+                  <Text className="text-base font-semibold mt-4 mb-2 text-gray-700">
+                    Sides
+                  </Text>
+                  <NumberInput
+                    label="Sides"
+                    // Type assertion to 'any' is used here for 'sides' as well.
+                    value={(selectedLayer as any).sides ?? 3} // Default to 3 sides
+                    min={3} // Minimum 3 sides for a polygon
+                    max={20} // Arbitrary max, adjust as needed
+                    onChange={(val) => updateLayer({ sides: val })}
+                  />
+                </>
+              )}
 
               {/* Corners */}
               {selectedLayer.type === LayerType.Rectangle &&
@@ -287,7 +313,7 @@ export default function RightSidebar({
               )}
             </>
           ) : (
-            // This block is shown when no layer is selected (Canvas Properties)
+            // This block is shown when no layer is selected
             <>
               <Text className="text-base font-semibold mt-4 mb-2 text-gray-700">
                 Canvas Properties
@@ -295,9 +321,9 @@ export default function RightSidebar({
               <MobileColorPicker
                 label="Canvas Background"
                 value={colorToCss(roomColor ?? { r: 255, g: 255, b: 255 })}
-                onChange={debouncedUpdateRoomColor} // Use the debounced function here
+                onChange={debouncedUpdateRoomColor}
               />
-              <Text className="mt-4 text-gray-600">No layer selected</Text>
+              <Text className="mt-4">No layer selected</Text>
             </>
           )}
         </View>

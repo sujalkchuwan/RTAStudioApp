@@ -7,10 +7,13 @@ import {
   TextInput,
   Dimensions,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState, useMemo } from "react";
-import { generateLightColor } from "@/utils/color";
+import { generateLightColor } from "@/utils/color"; // Assuming this utility exists
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const colorCache: Record<string, { durationColor: string; nameColor: string }> =
   {};
@@ -81,7 +84,25 @@ export default function ExploreScreen() {
       });
   }, []);
 
+  // Helper to generate a random dark color for the gradient background
+  const generateRandomDarkColor = () => {
+    const colors = [
+      "#5D3A3A", // Dark Red-Brown
+      "#3A5D5D", // Dark Teal
+      "#5D3A5D", // Dark Purple
+      "#3A5D3A", // Dark Green
+      "#5D5D3A", // Dark Yellow-Brown
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
   return (
+    // <SafeAreaView style={{ flex: 1}}>
+    //   <KeyboardAvoidingView
+    //   style={{ flex: 1 }}
+    //   behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // 'padding' for iOS, 'height' for Android
+    //   keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // Adjust as needed
+    // >
     <View className="flex-1 bg-gray-100 px-4 pt-6 mt-10 ">
       <Text className="text-4xl font-semibold text-black mb-5">Explore</Text>
 
@@ -117,11 +138,14 @@ export default function ExploreScreen() {
           renderItem={({ item }) => {
             if (!colorCache[item.id]) {
               colorCache[item.id] = {
-                durationColor: generateLightColor(),
+                durationColor: generateLightColor(), // This was previously used for duration, now replaced
                 nameColor: generateLightColor(),
               };
             }
-            const { durationColor, nameColor } = colorCache[item.id];
+            // Use a dark random color for the duration background
+            const durationBgColor = generateRandomDarkColor();
+            // Use a dark random color for the textile name background
+            const textileNameBgColor = generateRandomDarkColor();
 
             return (
               <TouchableOpacity
@@ -143,7 +167,7 @@ export default function ExploreScreen() {
                     padding: 8,
                     marginBottom: 16,
                     alignSelf: "center",
-                    overflow: "hidden",
+                    overflow: "hidden"
                   }}
                 >
                   {/* ROW 1 */}
@@ -162,25 +186,49 @@ export default function ExploreScreen() {
                           style={{
                             flex: 1,
                             justifyContent: "center",
-                            backgroundColor: durationColor,
+                            // Use dark random color for duration background
+                            backgroundColor: durationBgColor,
                             borderRadius: 8,
                           }}
                         >
-                          <Text className="text-xs text-gray-600 text-center">
+                          {/* Text color changed to white for contrast */}
+                          <Text
+                            className="text-xs text-center"
+                            style={{ color: "white" }}
+                          >
                             {item.duration}
                           </Text>
                         </View>
+                        {/* Textile Name Section with dark overlay and white text */}
                         <View
                           style={{
                             flex: 2,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            backgroundColor: nameColor,
-                            borderRadius: 8,
                             marginLeft: 4,
+                            borderRadius: 8,
+                            overflow: "hidden",
+                            position: "relative",
+                            justifyContent: "center", // Center text vertically
+                            alignItems: "center", // Center text horizontally
                           }}
                         >
-                          <Text className="text-sm font-semibold text-center">
+                          {/* Dark overlay for exposure effect */}
+                          <View
+                            style={{
+                              position: "absolute",
+                              width: "100%",
+                              height: "100%",
+                              backgroundColor: textileNameBgColor,
+                              borderRadius: 8, // Match container border radius
+                            }}
+                          />
+                          {/* Textile Name Text directly on top, now white */}
+                          <Text className="font-sm"
+                            style={{
+                              color: "white", // Text color is white
+                              textAlign: "center",
+                              fontWeight: "bold",
+                            }}
+                          >
                             {item.textileName}
                           </Text>
                         </View>
@@ -197,6 +245,7 @@ export default function ExploreScreen() {
                             alignItems: "center",
                           }}
                         >
+                          {/* Image */}
                           <Image
                             source={{ uri: item.originImage }}
                             style={{
@@ -206,25 +255,43 @@ export default function ExploreScreen() {
                             }}
                             resizeMode="cover"
                           />
-                          <Text className="absolute">{item.origin}</Text>
-                          <Text
-                            className="text-center"
+                          {/* Dark overlay for exposure effect */}
+                          <View
+                            style={{
+                              position: "absolute",
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: 8, // Match image border radius
+                              backgroundColor: "rgba(0,0,0,0.4)", // Semi-transparent dark overlay
+                            }}
+                          />
+                          {/* Changed from absolute text to a View with background for better visibility */}
+                          <View
                             style={{
                               position: "absolute",
                               bottom: 6,
-                              color: "white",
-                              fontWeight: "bold",
+                              backgroundColor: "rgba(0,0,0,0.5)", // Dark semi-transparent background
                               paddingHorizontal: 6,
                               paddingVertical: 2,
                               borderRadius: 4,
-                              fontSize: 10,
                             }}
                           >
-                            Origin
-                          </Text>
+                            {/* Text color changed to white */}
+                            <Text
+                              className="text-center"
+                              style={{
+                                color: "white",
+                                fontWeight: "bold",
+                                fontSize: 10,
+                              }}
+                            >
+                              Origin
+                            </Text>
+                          </View>
                         </View>
 
                         <View style={{ flex: 2, position: "relative" }}>
+                          {/* Image */}
                           <Image
                             source={{ uri: item.image }}
                             style={{
@@ -233,6 +300,16 @@ export default function ExploreScreen() {
                               borderRadius: 12,
                             }}
                             resizeMode="cover"
+                          />
+                          {/* Dark overlay for exposure effect */}
+                          <View
+                            style={{
+                              position: "absolute",
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: 12, // Match image border radius
+                              backgroundColor: "rgba(0,0,0,0.4)", // Semi-transparent dark overlay
+                            }}
                           />
                         </View>
                       </View>
@@ -247,6 +324,7 @@ export default function ExploreScreen() {
                         alignItems: "center",
                       }}
                     >
+                      {/* Image */}
                       <Image
                         source={{ uri: item.weavingTechniqueImage }}
                         style={{
@@ -256,23 +334,45 @@ export default function ExploreScreen() {
                         }}
                         resizeMode="cover"
                       />
-                      <Text className="absolute text-white">
-                        {item.weavingTechniqueText}
-                      </Text>
-                      <Text
-                        className="text-center"
+                      {/* Dark overlay for exposure effect */}
+                      <View
+                        style={{
+                          position: "absolute",
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 12, // Match image border radius
+                          backgroundColor: "rgba(0,0,0,0.4)", // Semi-transparent dark overlay
+                        }}
+                      />
+                      {/* Changed from absolute text to a View with background for better visibility */}
+                      <View
                         style={{
                           position: "absolute",
                           top: 6,
-                          color: "white",
-                          fontWeight: "bold",
+                          backgroundColor: "rgba(0,0,0,0.5)", // Dark semi-transparent background
                           paddingHorizontal: 6,
                           paddingVertical: 2,
                           borderRadius: 4,
-                          fontSize: 10,
                         }}
                       >
-                        WEAVING TECHNIQUE
+                        {/* Text color changed to white */}
+                        <Text
+                          className="text-center"
+                          style={{
+                            color: "white",
+                            fontWeight: "bold",
+                            fontSize: 10,
+                          }}
+                        >
+                          WEAVING TECHNIQUE
+                        </Text>
+                      </View>
+                      {/* Text color changed to white */}
+                      <Text
+                        className="absolute bottom-6"
+                        style={{ color: "white" }}
+                      >
+                        {item.weavingTechniqueText}
                       </Text>
                     </View>
                   </View>
@@ -283,6 +383,7 @@ export default function ExploreScreen() {
                       flexDirection: "row",
                       justifyContent: "space-between",
                       marginTop: 8,
+                      gap: 5,
                     }}
                   >
                     <View
@@ -294,26 +395,44 @@ export default function ExploreScreen() {
                         alignItems: "center",
                       }}
                     >
+                      {/* Image */}
                       <Image
                         source={{ uri: item.motifImage }}
                         style={{ width: "100%", height: 80, borderRadius: 12 }}
                         resizeMode="cover"
                       />
-                      <Text
-                        className="text-center"
+                      {/* Dark overlay for exposure effect */}
+                      <View
+                        style={{
+                          position: "absolute",
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 12, // Match image border radius
+                          backgroundColor: "rgba(0,0,0,0.4)", // Semi-transparent dark overlay
+                        }}
+                      />
+                      <View
                         style={{
                           position: "absolute",
                           bottom: 6,
-                          color: "white",
-                          fontWeight: "bold",
+                          backgroundColor: "rgba(0,0,0,0.5)",
                           paddingHorizontal: 6,
                           paddingVertical: 2,
                           borderRadius: 4,
-                          fontSize: 10,
                         }}
                       >
-                        Motifs Found
-                      </Text>
+                        {/* Text color changed to white */}
+                        <Text
+                          className="text-center"
+                          style={{
+                            color: "white",
+                            fontWeight: "bold",
+                            fontSize: 10,
+                          }}
+                        >
+                          Motifs Found
+                        </Text>
+                      </View>
                     </View>
 
                     <View
@@ -324,28 +443,50 @@ export default function ExploreScreen() {
                         alignItems: "center",
                       }}
                     >
+                      {/* Image */}
                       <Image
                         source={{ uri: item.symbolismImage }}
                         style={{ width: "100%", height: 80, borderRadius: 12 }}
                         resizeMode="cover"
                       />
-                      <Text className="absolute text-white">
-                        {trimWords(item.symbolismText)}
-                      </Text>
-                      <Text
-                        className="text-center"
+                      {/* Dark overlay for exposure effect */}
+                      <View
+                        style={{
+                          position: "absolute",
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 12, // Match image border radius
+                          backgroundColor: "rgba(0,0,0,0.4)", // Semi-transparent dark overlay
+                        }}
+                      />
+                      <View
                         style={{
                           position: "absolute",
                           bottom: 6,
-                          color: "white",
-                          fontWeight: "bold",
+                          backgroundColor: "rgba(0,0,0,0.5)",
                           paddingHorizontal: 6,
                           paddingVertical: 2,
                           borderRadius: 4,
-                          fontSize: 10,
                         }}
                       >
-                        SYMBOLISM & FACTS
+                        {/* Text color changed to white */}
+                        <Text
+                          className="text-center"
+                          style={{
+                            color: "white",
+                            fontWeight: "bold",
+                            fontSize: 10,
+                          }}
+                        >
+                          SYMBOLISM & FACTS
+                        </Text>
+                      </View>
+                      {/* Text color changed to white */}
+                      <Text
+                        className="absolute top-6"
+                        style={{ color: "white" }}
+                      >
+                        {trimWords(item.symbolismText)}
                       </Text>
                     </View>
                   </View>
@@ -356,5 +497,7 @@ export default function ExploreScreen() {
         />
       )}
     </View>
+    // </KeyboardAvoidingView>
+    // </SafeAreaView>
   );
 }

@@ -38,11 +38,12 @@ const _layout = () => {
             borderRadius: 5,
             marginHorizontal: 1,
             height: 92,
-            position: "absolute",
+            position: "absolute", // This helps keep it fixed at the bottom
             overflow: "hidden",
             borderWidth: 1,
             borderColor: "#ffffff",
           },
+          // Removed the incorrect keyboardHandlingEnabled property
         }}
       >
         <Tabs.Screen

@@ -3,6 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 import { RoomProvider } from "@/liveblocks.config";
 import { LiveMap, LiveObject, LiveList } from "@liveblocks/client";
 import { Layer, Color } from "@/types";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Canvas() {
   const { id } = useLocalSearchParams();
@@ -20,6 +21,7 @@ export default function Canvas() {
   };
 
   return (
+    <SafeAreaView style={{flex:1}} >
     <RoomProvider
       id={`room:${id}`}
       initialPresence={{
@@ -32,5 +34,6 @@ export default function Canvas() {
     >
       <CanvasView />
     </RoomProvider>
+    </SafeAreaView>
   );
 }

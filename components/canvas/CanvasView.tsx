@@ -237,7 +237,6 @@ export function CanvasView() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Top bar with back button */}
       <View className="flex flex-row justify-start items-center p-3 bg-gray-100 border-b border-gray-200">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -245,34 +244,23 @@ export function CanvasView() {
         >
           <FontAwesome name="angle-left" size={24} color="black" />
         </TouchableOpacity>
-        <View className="flex-1">
-          {/* You can add a title or other elements here if needed */}
-        </View>
+        <View className="flex-1"></View>
       </View>
-
-      {/* Main canvas container */}
       <View className="flex-1 overflow-hidden">
         <PinchGestureHandler
           onGestureEvent={onPinchGestureEvent}
           onHandlerStateChange={onPinchStateChange}
         >
-          {/* PanResponder handlers applied to this View */}
           <View className="flex-1" {...panResponder.panHandlers}>
             <Svg
               width="100%"
               height="100%"
-              viewBox={viewBoxString} // Use the dynamic viewBox string
+              viewBox={viewBoxString}
               style={{
                 backgroundColor: roomColor ? colorToCss(roomColor) : "#fff",
               }}
             >
-              {/* AnimatedG is no longer strictly necessary for pan/zoom,
-                  but can remain if individual layer transforms are intended later.
-                  It no longer applies the main pan/zoom transforms. */}
               <G>
-                {" "}
-                {/* Changed AnimatedG back to G as it's not applying transforms */}
-                {/* Render each layer component */}
                 {visibleLayerIds?.map((id) => (
                   <LayerComponent
                     key={id}
@@ -285,8 +273,6 @@ export function CanvasView() {
           </View>
         </PinchGestureHandler>
       </View>
-
-      {/* Right sidebar for properties */}
       <Animated.View
         style={[
           { transform: [{ translateX: sidebarTranslateX }] },
@@ -305,8 +291,8 @@ export function CanvasView() {
         <RightSidebar
           selectedLayerId={selectedLayer ?? ""}
           onClose={() => {
-            setShowRightSidebar(false); // This should correctly hide the sidebar
-            room.updatePresence({ selection: [] }); // This clears selection
+            setShowRightSidebar(false);
+            room.updatePresence({ selection: [] });
           }}
         />
       </Animated.View>

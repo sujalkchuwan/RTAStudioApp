@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Room = {
   id: string;
@@ -100,9 +101,9 @@ export default function Search() {
   );
 
   return (
-    <View className="flex-1 bg-gray-100 px-4 pt-4">
-      <Text className="text-4xl font-semibold text-black mb-4">Search</Text>
-
+    <SafeAreaView style={{flex:1}} >
+    <View className="flex-1 bg-gray-100 px-4 pt-4 mt-5">
+      <Text className="text-4xl font-semibold text-black mb-4 mt-10">Search</Text>
       <TextInput
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -110,16 +111,12 @@ export default function Search() {
         placeholderTextColor="#9ca3af"
         className="bg-white px-4 py-3 rounded-xl text-base text-gray-800 mb-4 border border-gray-200" // Adjusted mb-4
       />
-
-      {/* Shared with You Section */}
       <View className="mb-4 h-60">
         {" "}
-        {/* Added height and mb for consistent spacing */}
         <Text className="text-lg font-semibold mb-2">Shared with You</Text>
         {filteredSharedFiles.length === 0 ? (
           <Text className="text-gray-500 mb-0">
             {" "}
-            {/* Removed mb-4 here */}
             No files shared with you match this search.
           </Text>
         ) : (
@@ -128,7 +125,7 @@ export default function Search() {
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.room?.id || item.id}
-            style={{ flex: 1 }} // Let FlatList take remaining height of its parent View
+            style={{ flex: 1 }}
             renderItem={({ item }) => (
               <TouchableOpacity
                 className="mr-4"
@@ -161,15 +158,12 @@ export default function Search() {
           />
         )}
       </View>
-
-      {/* Your Projects Section */}
       <View style={{ flex: 1 }}>
         {" "}
-        {/* This section takes remaining space */}
         <Text className="text-lg font-semibold mt-4 mb-2">
+          {" "}
           Your Projects
-        </Text>{" "}
-        {/* Adjusted mt-4 */}
+        </Text>
         {filteredUserProjects.length === 0 ? (
           <Text className="text-gray-500">No projects match this search.</Text>
         ) : (
@@ -204,5 +198,6 @@ export default function Search() {
         )}
       </View>
     </View>
+    </SafeAreaView>
   );
 }

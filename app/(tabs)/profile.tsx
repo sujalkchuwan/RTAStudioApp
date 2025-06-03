@@ -2,20 +2,19 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   ScrollView,
-  Switch,
   Modal,
   Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { FontAwesome } from "@expo/vector-icons";
 
 type UserData = {
-  avatar: string;
-  username: string;
+  id:string;
+  name: string;
   email: string;
 };
 
@@ -33,8 +32,9 @@ export default function Profile() {
 
         if (parsedUser) {
           setUserData({
-            ...parsedUser,
-            avatar: "https://via.placeholder.com/150", // Dummy avatar
+            id: parsedUser.id,
+            name: parsedUser.name,
+            email: parsedUser.email,
           });
 
           setSessions([
@@ -84,18 +84,17 @@ export default function Profile() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="p-4">
+      <ScrollView className="p-4 mt-5">
         <Text className="text-4xl font-semibold text-black mb-6">Profile</Text>
 
         <View className="mb-4 p-4 bg-gray-50 rounded-lg">
           <View className="flex-row items-center mb-4">
-            <Image
-              source={{ uri: userData.avatar }}
-              className="w-16 h-16 rounded-full mr-3"
-            />
+            <View className="w-16 h-16 rounded-full bg-gray-200 mr-3 justify-center items-center">
+              <FontAwesome name="user" size={32} color="#6b7280" />
+            </View>
             <View className="flex-1">
               <Text className="text-sm text-gray-500 mb-1">Username</Text>
-              <Text className="text-base">{userData.username}</Text>
+              <Text className="text-base">{userData.name}</Text>
             </View>
           </View>
 
@@ -155,13 +154,14 @@ export default function Profile() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="border border-gray-900 p-4 rounded-lg items-center"
-            onPress={() => router.push("/")}
-          >
-            <Text className="text-gray-900 font-semibold">
-              Provide Feedback
-            </Text>
-          </TouchableOpacity>
+  className="border border-gray-900 p-4 rounded-lg items-center"
+  onPress={() =>router.push({
+  pathname: "/feedback",
+  params: { email: userData?.email, id: userData?.id }
+})}
+>
+  <Text className="text-gray-900 font-semibold">Provide Feedback</Text>
+</TouchableOpacity>
         </View>
       </ScrollView>
 
