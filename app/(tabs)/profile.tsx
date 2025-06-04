@@ -39,7 +39,7 @@ export default function Profile() {
 
           setSessions([
             {
-              deviceName: "iPhone 14 Pro",
+              deviceName: "iPhone 13",
               ipAddress: "192.168.1.5",
             },
             {

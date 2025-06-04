@@ -31,8 +31,6 @@ const AnimatedLine = Animated.createAnimatedComponent(Line);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedSvgText = Animated.createAnimatedComponent(SvgText);
 
-const FIXED_TEXTILE_ID = "cmbgr6c15000gnl2fytnv0";
-
 const ExploreMap = () => {
   const router = useRouter();
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
@@ -40,14 +38,7 @@ const ExploreMap = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // On mount, select region containing FIXED_TEXTILE_ID by default
-  useEffect(() => {
-    const regionWithTextile = regions.find((region) =>
-      region.textiles.some((t) => t.id === FIXED_TEXTILE_ID)
-    );
-    if (regionWithTextile) {
-      setSelectedRegionId(regionWithTextile.id);
-    }
-  }, []);
+
 
   // Animate fade in
   useEffect(() => {
@@ -66,15 +57,10 @@ const ExploreMap = () => {
   };
 
   // On textile press, always send the fixed textile id in the route params
-  const handleTextilePress = (textile?: Textile) => {
-    router.push({
-      pathname: "/explore/[id]",
-      params: {
-        id: FIXED_TEXTILE_ID,
-        textile: textile ? JSON.stringify(textile) : "",
-      },
-    });
-  };
+const handleTextilePress = (textile?: Textile) => {
+  router.push("/ExceptionPage");
+};
+
 
   const designAnnotations = [
     {

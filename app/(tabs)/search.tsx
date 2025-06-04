@@ -112,11 +112,11 @@ export default function Search() {
         className="bg-white px-4 py-3 rounded-xl text-base text-gray-800 mb-4 border border-gray-200" // Adjusted mb-4
       />
       <View className="mb-4 h-60">
-        {" "}
+        
         <Text className="text-lg font-semibold mb-2">Shared with You</Text>
         {filteredSharedFiles.length === 0 ? (
           <Text className="text-gray-500 mb-0">
-            {" "}
+       
             No files shared with you match this search.
           </Text>
         ) : (
@@ -159,9 +159,9 @@ export default function Search() {
         )}
       </View>
       <View style={{ flex: 1 }}>
-        {" "}
+     
         <Text className="text-lg font-semibold mt-4 mb-2">
-          {" "}
+
           Your Projects
         </Text>
         {filteredUserProjects.length === 0 ? (

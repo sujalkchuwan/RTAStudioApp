@@ -17,6 +17,7 @@ export default function RootLayout() {
         <Stack.Screen name="explore/[id]" options={{ headerShown: false }} />
          <Stack.Screen name="exploremap" options={{ headerShown: false }} />
          <Stack.Screen name="feedback" options={{ headerShown: false }} />
+                  <Stack.Screen name="ExceptionPage" options={{ headerShown: false }} />
         <Stack.Screen
           name="canvas/[id]"
           options={{ headerShown: false, gestureEnabled: false }}
